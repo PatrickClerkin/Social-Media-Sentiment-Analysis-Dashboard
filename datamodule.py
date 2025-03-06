@@ -16,9 +16,8 @@ reddit = praw.Reddit(
 
 # Initialize VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
-
 def fetch_posts(subreddit_name, limit=5):
-    """Fetch posts from a given subreddit and analyze sentiment."""
+    """Fetch posts from a given subreddit, including engagement metrics and sentiment analysis."""
     try:
         subreddit = reddit.subreddit(subreddit_name)
         posts = []
@@ -29,10 +28,13 @@ def fetch_posts(subreddit_name, limit=5):
                 text_to_analyze += " " + submission.selftext
             # Analyze sentiment
             sentiment = analyzer.polarity_scores(text_to_analyze)
+            # Create a dictionary with post data and engagement metrics
             post_data = {
                 "id": submission.id,
                 "title": submission.title,
-                "score": submission.score,
+                "score": submission.score,  # net upvotes minus downvotes
+                "num_comments": submission.num_comments,  # total comments
+                "upvote_ratio": submission.upvote_ratio,  # proportion of upvotes
                 "url": submission.url,
                 "author": str(submission.author),
                 "created_utc": submission.created_utc,
@@ -45,6 +47,7 @@ def fetch_posts(subreddit_name, limit=5):
     except Exception as e:
         logging.error(f"Error fetching posts: {e}")
         return []
+
 
 def save_posts_to_json(posts, filename="posts.json"):
     """Save posts to a JSON file."""
