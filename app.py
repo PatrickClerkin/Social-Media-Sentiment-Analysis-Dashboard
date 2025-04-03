@@ -1,15 +1,26 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS # type: ignore
 import sqlite3
 from sqlite3 import Error
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 DATABASE = 'reddit_posts.db'
 
 def get_db_connection():
     """Establish a connection to the SQLite database."""
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row  # enables dict-like access for rows
-    return conn
+    try:
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row  # enables dict-like access for rows
+        return conn
+    except Error as e:
+        app.logger.error(f"Database connection error: {e}")
+        return None
+
+@app.route('/', methods=['GET'])
+def home():
+    """Root route that provides a welcome message."""
+    return "Welcome to the Reddit Sentiment Analysis API!"
 
 @app.route('/posts', methods=['GET'])
 def get_posts():
@@ -26,6 +37,9 @@ def get_posts():
                  * Neutral: sentiment_compound between -0.05 and 0.05
     """
     conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Failed to connect to database"}), 500
+
     query = "SELECT * FROM posts"
     filters = []
     params = []
@@ -80,12 +94,17 @@ def get_posts():
     if filters:
         query += " WHERE " + " AND ".join(filters)
     
-    # Optionally, order by creation time descending (most recent first)
+    # Order results by creation time descending (most recent first)
     query += " ORDER BY created_utc DESC"
 
-    cur = conn.cursor()
-    cur.execute(query, tuple(params))
-    posts = cur.fetchall()
+    try:
+        cur = conn.cursor()
+        cur.execute(query, tuple(params))
+        posts = cur.fetchall()
+    except Error as e:
+        conn.close()
+        return jsonify({"error": str(e)}), 500
+
     conn.close()
 
     # Convert rows to dictionaries
@@ -96,8 +115,17 @@ def get_posts():
 def get_post(post_id):
     """Retrieve a single post by its ID."""
     conn = get_db_connection()
-    post = conn.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
+    if conn is None:
+        return jsonify({"error": "Failed to connect to database"}), 500
+
+    try:
+        post = conn.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
+    except Error as e:
+        conn.close()
+        return jsonify({"error": str(e)}), 500
+
     conn.close()
+
     if post is None:
         return jsonify({'error': 'Post not found'}), 404
     return jsonify(dict(post))
