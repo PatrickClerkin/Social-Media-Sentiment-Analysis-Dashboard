@@ -1,55 +1,97 @@
-.App {
-  text-align: center;
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background-color: #f2f2f2;
-}
-
-h1 {
-  margin-bottom: 20px;
+/* Global styles */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7f9;
   color: #333;
 }
 
+/* App container */
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header styling */
+.header {
+  background: linear-gradient(135deg, #4a90e2, #9013fe);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Posts container */
 .posts-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  padding: 20px;
+  flex: 1;
 }
 
+/* Post card styling */
 .post-card {
-  background: #fff;
-  border: 1px solid #ddd;
+  background-color: white;
   border-radius: 8px;
   width: 300px;
   margin: 10px;
   padding: 15px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .post-card:hover {
-  transform: scale(1.02);
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.post-card h3 {
+/* Post title */
+.post-title {
   font-size: 1.2em;
   margin-bottom: 10px;
-  color: #222;
+  color: #333;
 }
 
-.post-card p {
+/* Post details */
+.post-details {
+  font-size: 0.9em;
+  margin-bottom: 10px;
+  color: #666;
+}
+
+.post-info {
   margin: 5px 0;
-  color: #555;
 }
 
-.post-card a {
-  display: inline-block;
-  margin-top: 10px;
-  color: #007bff;
+.post-sentiment {
+  margin: 5px 0;
+}
+
+/* Link styling */
+.post-link {
   text-decoration: none;
+  color: #4a90e2;
   font-weight: bold;
 }
 
-.post-card a:hover {
+.post-link:hover {
   text-decoration: underline;
+}
+
+/* Loading and error messages */
+.loading, .error {
+  text-align: center;
+  font-size: 1.2em;
+  padding: 20px;
+}
+
+/* Footer styling */
+.footer {
+  background-color: #f4f7f9;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.8em;
+  color: #777;
 }

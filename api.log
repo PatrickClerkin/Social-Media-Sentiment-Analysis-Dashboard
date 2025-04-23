@@ -1,0 +1,2 @@
+2025-04-23 14:02:40,352 - __main__ - INFO - Database indexes created successfully
+2025-04-23 14:02:40,354 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False

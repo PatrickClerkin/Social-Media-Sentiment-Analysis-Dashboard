@@ -5,11 +5,10 @@ function App() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Update the API URL if needed (e.g., if deployed)
+
+  // Update API_URL as needed
   const API_URL = "http://127.0.0.1:5000/posts";
 
-  // Fetch posts from the Flask API on component mount
   useEffect(() => {
     fetch(API_URL)
       .then(response => {
@@ -27,30 +26,38 @@ function App() {
         setError(err);
         setLoading(false);
       });
-  }, [API_URL]);
+  }, []);
 
-  if (loading) return <div>Loading posts...</div>;
-  if (error) return <div>Error loading posts: {error.message}</div>;
+  if (loading) return <div className="loading">Loading posts...</div>;
+  if (error) return <div className="error">Error loading posts: {error.message}</div>;
 
   return (
     <div className="App">
-      <h1>Reddit Sentiment Analysis Dashboard</h1>
+      <header className="header">
+        <h1>Reddit Sentiment Dashboard</h1>
+      </header>
       <div className="posts-container">
         {posts.map(post => (
           <div key={post.id} className="post-card">
-            <h3>{post.title}</h3>
-            <p>
-              Score: {post.score} | Comments: {post.num_comments}
-            </p>
-            <p>
-              Sentiment Compound Score: {post.sentiment_compound ? post.sentiment_compound : post.sentiment ? post.sentiment.compound : 'N/A'}
-            </p>
-            <a href={post.url} target="_blank" rel="noopener noreferrer">
+            <h3 className="post-title">{post.title}</h3>
+            <div className="post-details">
+              <p className="post-info">
+                <strong>Score:</strong> {post.score} &nbsp;|&nbsp;
+                <strong>Comments:</strong> {post.num_comments}
+              </p>
+              <p className="post-sentiment">
+                <strong>Sentiment:</strong> {post.sentiment && post.sentiment.compound ? post.sentiment.compound.toFixed(2) : 'N/A'}
+              </p>
+            </div>
+            <a className="post-link" href={post.url} target="_blank" rel="noopener noreferrer">
               View Post
             </a>
           </div>
         ))}
       </div>
+      <footer className="footer">
+        <p>&copy; {new Date().getFullYear()} Reddit Sentiment Dashboard</p>
+      </footer>
     </div>
   );
 }
