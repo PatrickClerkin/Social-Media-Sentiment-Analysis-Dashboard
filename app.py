@@ -65,3 +65,58 @@ def init_db():
             logger.error(f"Error creating database indexes: {e}")
         finally:
             conn.close()
+
+            
+def rate_limit(f):
+    """Rate limiting decorator"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        client_ip = request.remote_addr
+        current_time = time.time()
+        
+        # Initialize or reset client's request count
+        if client_ip not in RATE_LIMIT['clients'] or \
+           current_time - RATE_LIMIT['clients'][client_ip]['start_time'] > RATE_LIMIT['per_seconds']:
+            RATE_LIMIT['clients'][client_ip] = {
+                'count': 1,
+                'start_time': current_time
+            }
+        else:
+            # Increment request count
+            RATE_LIMIT['clients'][client_ip]['count'] += 1
+            
+        # Check if limit exceeded
+        if RATE_LIMIT['clients'][client_ip]['count'] > RATE_LIMIT['requests']:
+            logger.warning(f"Rate limit exceeded for {client_ip}")
+            return jsonify({
+                'error': 'Rate limit exceeded',
+                'message': 'Too many requests. Please try again later.'
+            }), 429
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
+def cache_response(timeout=CACHE_TIMEOUT):
+    """Caching decorator"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # Generate a cache key based on the request path and query parameters
+            cache_key = request.path + '?' + request.query_string.decode('utf-8')
+            
+            # Check if we have a valid cached response
+            if cache_key in cache['data'] and time.time() - cache['timestamp'][cache_key] < timeout:
+                logger.info(f"Cache hit for {cache_key}")
+                return cache['data'][cache_key]
+            
+            # If not in cache or expired, get fresh data
+            response = f(*args, **kwargs)
+            
+            # Cache the response
+            cache['data'][cache_key] = response
+            cache['timestamp'][cache_key] = time.time()
+            logger.info(f"Cached response for {cache_key}")
+            
+            return response
+        return decorated_function
+    return decorator
