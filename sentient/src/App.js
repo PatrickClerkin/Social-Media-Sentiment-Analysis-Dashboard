@@ -1,30 +1,7 @@
 // App.js
 import React, { useState, useEffect } from 'react';
-import { Bar, Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './App.css';
-
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 function App() {
   // State for posts data
@@ -207,86 +184,24 @@ function App() {
       const neutral = filteredPosts.filter(post => post.sentiment_compound >= -0.05 && post.sentiment_compound <= 0.05).length;
       const negative = filteredPosts.filter(post => post.sentiment_compound < -0.05).length;
       
-      return {
-        labels: ['Positive', 'Neutral', 'Negative'],
-        datasets: [
-          {
-            label: 'Number of Posts',
-            data: [positive, neutral, negative],
-            backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(255, 99, 132, 0.6)'],
-            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 206, 86, 1)', 'rgba(255, 99, 132, 1)'],
-            borderWidth: 1,
-          },
-        ],
-      };
+      return [
+        { name: 'Positive', value: positive, fill: '#4caf50' },
+        { name: 'Neutral', value: neutral, fill: '#ff9800' },
+        { name: 'Negative', value: negative, fill: '#f44336' }
+      ];
     } else if (visualizationType === 'engagementVsSentiment') {
       // Sort posts by score for visualization
-      const sortedPosts = [...filteredPosts].sort((a, b) => b.score - a.score).slice(0, 10);
-      
-      return {
-        labels: sortedPosts.map(post => post.title.substring(0, 20) + '...'),
-        datasets: [
-          {
-            label: 'Score',
-            data: sortedPosts.map(post => post.score),
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            yAxisID: 'y',
-          },
-          {
-            label: 'Sentiment Compound',
-            data: sortedPosts.map(post => post.sentiment_compound),
-            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1,
-            type: 'line',
-            yAxisID: 'y1',
-          },
-        ],
-      };
+      return [...filteredPosts]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10)
+        .map(post => ({
+          name: post.title.substring(0, 20) + '...',
+          score: post.score,
+          sentiment: post.sentiment_compound
+        }));
     }
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: visualizationType === 'engagementVsSentiment' ? {
-      y: {
-        type: 'linear',
-        display: true,
-        position: 'left',
-        title: {
-          display: true,
-          text: 'Score',
-        },
-      },
-      y1: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        grid: {
-          drawOnChartArea: false,
-        },
-        title: {
-          display: true,
-          text: 'Sentiment',
-        },
-        min: -1,
-        max: 1,
-      },
-    } : {},
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: visualizationType === 'sentimentDistribution' 
-          ? 'Post Sentiment Distribution' 
-          : 'Top Posts: Engagement vs Sentiment',
-      },
-    },
+    
+    return [];
   };
 
   if (loading) return (
@@ -457,11 +372,29 @@ function App() {
               </div>
             </div>
             <div className="chart-container">
-              {visualizationType === 'sentimentDistribution' ? (
-                <Bar data={prepareChartData()} options={chartOptions} />
-              ) : (
-                <Bar data={prepareChartData()} options={chartOptions} />
-              )}
+              <ResponsiveContainer width="100%" height={300}>
+                {visualizationType === 'sentimentDistribution' ? (
+                  <BarChart data={prepareChartData()}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" name="Posts" />
+                  </BarChart>
+                ) : (
+                  <BarChart data={prepareChartData()}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                    <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" domain={[-1, 1]} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="score" name="Score" fill="#8884d8" />
+                    <Line yAxisId="right" type="monotone" dataKey="sentiment" name="Sentiment" stroke="#82ca9d" />
+                  </BarChart>
+                )}
+              </ResponsiveContainer>
             </div>
           </div>
 

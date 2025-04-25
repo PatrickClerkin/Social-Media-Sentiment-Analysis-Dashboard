@@ -1,2 +1,136 @@
 2025-04-23 14:02:40,352 - __main__ - INFO - Database indexes created successfully
 2025-04-23 14:02:40,354 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-23 15:10:51,864 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-23 15:10:51,875 - __main__ - INFO - Cached response for /posts?
+2025-04-23 15:10:51,880 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:10:51] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:10:51,885 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:10:51,886 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:10:51] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:00,398 - __main__ - INFO - Database indexes created successfully
+2025-04-23 15:12:00,399 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-23 15:12:00,434 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.19:5000
+2025-04-23 15:12:00,434 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-23 15:12:34,485 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-23 15:12:34,487 - __main__ - INFO - Cached response for /posts?
+2025-04-23 15:12:34,489 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:34] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:34,496 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:34,499 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:34] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:41,271 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:41,272 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:41] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:41,281 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:41,286 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:41] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:42,628 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:42,629 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:42] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:42,636 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:42,637 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:42] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:43,700 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:43,700 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:43] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:43,707 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:43,708 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:43] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:44,673 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:44,673 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:44] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:44,678 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:44,681 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:44] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:45,704 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:45,705 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:45] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:12:45,711 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:12:45,713 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:12:45] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:08,610 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:08,612 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:08] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:08,617 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:08,619 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:08] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:09,433 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:09,434 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:09] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:09,438 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:09,438 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:09] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:10,134 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:10,134 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:10] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:10,139 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:10,140 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:10] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:10,911 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:10,911 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:10] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:10,917 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:10,917 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:10] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:11,861 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:11,861 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:11] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:11,865 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:11,866 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:11] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:12,695 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:12,696 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:12] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:12,700 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:12,702 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:12] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:13,486 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:13,487 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:13] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:13,491 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:13,493 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:13] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:14,264 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:14,264 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:14] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:14,269 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:14,272 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:14] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:15,574 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:15,574 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:15] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:15,579 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:15,582 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:15] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:16,713 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:16,715 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:16] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:16,718 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:16,719 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:16] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:18,404 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:18,404 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:18] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:18,413 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:18,415 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:18] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:21,607 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:21,609 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:21] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:13:21,610 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:13:21,612 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:13:21] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:16:25,286 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:16:25,288 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:16:25] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:16:25,292 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:16:25,293 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:16:25] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:20:39,680 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-23 15:20:39,687 - __main__ - INFO - Cached response for /posts?
+2025-04-23 15:20:39,692 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:20:39] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:20:39,696 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:20:39,698 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:20:39] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:20:48,352 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:20:48,353 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:20:48] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:20:48,357 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:20:48,357 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:20:48] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:31:07,051 - __main__ - INFO - Database indexes created successfully
+2025-04-23 15:31:07,053 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-23 15:31:07,082 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.19:5000
+2025-04-23 15:31:07,083 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-23 15:31:52,487 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-23 15:31:52,490 - __main__ - INFO - Cached response for /posts?
+2025-04-23 15:31:52,494 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:31:52] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:31:52,500 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:31:52,502 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:31:52] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:32:13,448 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:32:13,450 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:32:13] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:32:13,459 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:32:13,464 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:32:13] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:34:56,717 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:34:56,719 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:34:56] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:34:56,725 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:34:56,728 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:34:56] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:36:32,305 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:36:32,307 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:36:32] "GET /posts HTTP/1.1" 200 -
+2025-04-23 15:36:32,312 - __main__ - INFO - Cache hit for /posts?
+2025-04-23 15:36:32,314 - werkzeug - INFO - 127.0.0.1 - - [23/Apr/2025 15:36:32] "GET /posts HTTP/1.1" 200 -
+2025-04-25 20:55:09,264 - __main__ - INFO - Database indexes created successfully
+2025-04-25 20:55:09,265 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-25 20:55:09,360 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.19:5000
+2025-04-25 20:55:09,362 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-25 20:55:49,183 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-25 20:55:49,213 - __main__ - INFO - Cached response for /posts?
+2025-04-25 20:55:49,227 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 20:55:49] "GET /posts HTTP/1.1" 200 -
+2025-04-25 20:55:49,258 - __main__ - INFO - Cache hit for /posts?
+2025-04-25 20:55:49,274 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 20:55:49] "GET /posts HTTP/1.1" 200 -
