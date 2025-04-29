@@ -134,3 +134,189 @@
 2025-04-25 20:55:49,227 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 20:55:49] "GET /posts HTTP/1.1" 200 -
 2025-04-25 20:55:49,258 - __main__ - INFO - Cache hit for /posts?
 2025-04-25 20:55:49,274 - werkzeug - INFO - 127.0.0.1 - - [25/Apr/2025 20:55:49] "GET /posts HTTP/1.1" 200 -
+2025-04-26 01:34:17,277 - __main__ - INFO - Database indexes created successfully
+2025-04-26 01:34:17,306 - auth - INFO - Auth database tables created successfully
+2025-04-26 01:34:17,308 - __main__ - INFO - Databases initialized
+2025-04-26 01:34:17,314 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-26 01:34:17,451 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.19:5000
+2025-04-26 01:34:17,452 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-26 01:52:04,119 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-26 01:52:04,128 - __main__ - INFO - Cached response for /posts?
+2025-04-26 01:52:04,144 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:52:04] "GET /posts HTTP/1.1" 200 -
+2025-04-26 01:52:04,144 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 01:52:04,152 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:52:04] "GET /posts HTTP/1.1" 200 -
+2025-04-26 01:52:37,542 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:52:37] "OPTIONS /auth/register HTTP/1.1" 200 -
+2025-04-26 01:52:37,575 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:52:37] "[35m[1mPOST /auth/register HTTP/1.1[0m" 201 -
+2025-04-26 01:52:37,692 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:52:37] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:52:37,694 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:52:37] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:52:37,727 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:52:37] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:52:37,741 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:52:37] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:55:19,805 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:55:19] "OPTIONS /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:55:19,844 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:55:19] "PUT /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:55:21,273 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:55:21] "PUT /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:55:46,420 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:55:46] "OPTIONS /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:55:46,498 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:55:46] "PUT /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:55:47,472 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:55:47] "PUT /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:56:31,563 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:31] "OPTIONS /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:56:31,616 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:31] "PUT /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:56:32,285 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:32] "PUT /auth/preferences HTTP/1.1" 200 -
+2025-04-26 01:56:43,498 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:43] "OPTIONS /posts?min_comments=-1 HTTP/1.1" 200 -
+2025-04-26 01:56:43,518 - __main__ - INFO - Executing query: SELECT * FROM posts WHERE num_comments >= ? ORDER BY created_utc DESC with params [-1]
+2025-04-26 01:56:43,520 - __main__ - INFO - Cached response for /posts?min_comments=-1
+2025-04-26 01:56:43,520 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:43] "GET /posts?min_comments=-1 HTTP/1.1" 200 -
+2025-04-26 01:56:43,589 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:43] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:56:43,597 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:43] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:56:43,610 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:43] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:56:43,620 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:56:43] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:57:16,380 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:16] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 01:57:16,386 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:16] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 01:57:16,403 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:16] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 01:57:16,589 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:16] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:57:16,595 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:16] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:57:16,613 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:16] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:57:16,624 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:16] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:57:47,254 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:47] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 01:57:47,259 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:47] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 01:57:47,562 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:47] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:57:47,578 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:47] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:57:47,613 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:47] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:57:47,627 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:57:47] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:58:05,971 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:58:05] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 01:58:05,977 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:58:05] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 01:58:06,194 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:58:06] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:58:06,194 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:58:06] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:58:06,211 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:58:06] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:58:06,227 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:58:06] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 01:58:40,070 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-26 01:58:40,090 - __main__ - INFO - Cached response for /posts?
+2025-04-26 01:58:40,116 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:58:40] "GET /posts HTTP/1.1" 200 -
+2025-04-26 01:58:40,136 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 01:58:40,138 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 01:58:40] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:27:53,882 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:53] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:27:53,870 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:53] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:27:53,892 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-26 02:27:54,018 - __main__ - INFO - Cached response for /posts?
+2025-04-26 02:27:54,031 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:54] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:27:54,031 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:54] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:27:54,069 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:27:54,070 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:54] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:27:54,085 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:54] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:27:54,195 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:54] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:27:54,283 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:54] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:27:54,293 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:27:54] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:18,290 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:18] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:18,331 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:18] "[35m[1mPOST /auth/filters HTTP/1.1[0m" 201 -
+2025-04-26 02:30:29,090 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:30:29,096 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:30:29,098 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:30:29,110 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:30:29,123 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:30:29,125 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:30:29,154 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:30:29,174 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:30:29,303 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:29,305 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:29,317 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:29,327 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:29] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:31,544 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:31] "OPTIONS /posts HTTP/1.1" 200 -
+2025-04-26 02:30:31,552 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:30:31,552 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:31] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:30:31,628 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:31] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:31,639 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:31] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:33,559 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:33] "OPTIONS /posts?search=football HTTP/1.1" 200 -
+2025-04-26 02:30:33,571 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-26 02:30:33,571 - __main__ - INFO - Cached response for /posts?search=football
+2025-04-26 02:30:33,571 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:33] "GET /posts?search=football HTTP/1.1" 200 -
+2025-04-26 02:30:33,651 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:33] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:33,666 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:33] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:41,110 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "OPTIONS /posts?search=football HTTP/1.1" 200 -
+2025-04-26 02:30:41,120 - __main__ - INFO - Cache hit for /posts?search=football
+2025-04-26 02:30:41,120 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "GET /posts?search=football HTTP/1.1" 200 -
+2025-04-26 02:30:41,184 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:41,188 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:41,202 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:41,208 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:41,856 - __main__ - INFO - Cache hit for /posts?search=football
+2025-04-26 02:30:41,856 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "GET /posts?search=football HTTP/1.1" 200 -
+2025-04-26 02:30:41,922 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:41,936 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:41] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:47,880 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:30:47,883 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:47] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:30:47,887 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:47] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:30:47,890 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:47] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:30:47,897 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:30:47,899 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:47] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:30:47,906 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:47] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:30:47,922 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:47] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:30:48,025 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:48] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:48,028 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:48] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:48,044 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:48] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:48,054 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:48] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:51,424 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:51] "OPTIONS /posts HTTP/1.1" 200 -
+2025-04-26 02:30:51,424 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:30:51,433 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:51] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:30:51,504 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:51] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:30:51,516 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:30:51] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:01,816 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:01] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:01,811 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:01] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:01,831 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-26 02:48:01,899 - __main__ - INFO - Cached response for /posts?
+2025-04-26 02:48:01,901 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:01] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:01,905 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:01] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:48:01,931 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:01] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:01,949 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:48:01,963 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:01] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:48:02,014 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:02] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:02,020 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:02] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:02,052 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:02] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:02,068 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:02] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:13,616 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:13,624 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:13,628 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:48:13,633 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:48:13,638 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:13,648 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:48:13,653 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:48:13,659 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:13,787 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:13,791 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:13,812 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:13,828 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:13] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:22,475 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:22] "[33mGET /search?q=football HTTP/1.1[0m" 404 -
+2025-04-26 02:48:30,075 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:30,086 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:48:30,092 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:48:30,096 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:30,124 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:48:30,124 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:48:30,129 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:30,155 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:48:30,311 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:30,315 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:30,340 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:48:30,352 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:48:30] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:49:45,935 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:45] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:49:45,993 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:45] "[35m[1mPOST /auth/filters HTTP/1.1[0m" 201 -
+2025-04-26 02:49:51,313 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:51] "[33mGET /search?q=football HTTP/1.1[0m" 404 -
+2025-04-26 02:49:57,606 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:49:57,621 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:49:57,640 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:49:57,649 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:49:57,673 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:49:57,681 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:49:57,683 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:49:57,718 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "GET /auth/profile HTTP/1.1" 200 -
+2025-04-26 02:49:57,876 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:49:57,876 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "OPTIONS /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:49:57,898 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:49:57,919 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:57] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:49:59,596 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:59] "OPTIONS /posts HTTP/1.1" 200 -
+2025-04-26 02:49:59,602 - __main__ - INFO - Cache hit for /posts?
+2025-04-26 02:49:59,602 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:59] "GET /posts HTTP/1.1" 200 -
+2025-04-26 02:49:59,665 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:59] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:49:59,677 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:59] "GET /auth/filters HTTP/1.1" 200 -
+2025-04-26 02:50:06,806 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:50:06] "[33mGET /search?q=football HTTP/1.1[0m" 404 -
+2025-04-26 02:50:09,083 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:50:09] "[33mGET /search?q=football HTTP/1.1[0m" 404 -

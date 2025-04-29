@@ -12,6 +12,13 @@ import jwt
 import secrets
 import hashlib
 
+# New imports for live Reddit search
+from praw import Reddit
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+# Import auth blueprint and init_auth_db
+from auth import auth_bp, init_auth_db, token_required
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -21,11 +28,13 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)  # Enable CORS with credentials support
+
+# Register the auth blueprint
+app.register_blueprint(auth_bp, url_prefix='/auth')
 
 # Configuration
 DATABASE = 'reddit_posts.db'
@@ -45,6 +54,14 @@ RATE_LIMIT = {
     'per_seconds': 60,  # time window in seconds
     'clients': {}
 }
+
+# Initialize PRAW & VADER for live search
+reddit = Reddit(
+    client_id=os.environ.get('REDDIT_CLIENT_ID'),
+    client_secret=os.environ.get('REDDIT_CLIENT_SECRET'),
+    user_agent=os.environ.get('REDDIT_USER_AGENT', 'RedditSentimentAPI/1.0')
+)
+analyzer = SentimentIntensityAnalyzer()
 
 def get_db_connection():
     """Establish a connection to the SQLite database."""
@@ -74,48 +91,11 @@ def init_db():
         finally:
             conn.close()
 
-def init_auth_db():
-    """Initialize database tables for authentication."""
-    conn = get_db_connection()
-    if conn is not None:
-        try:
-            cur = conn.cursor()
-            
-            # Create users table
-            cur.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at REAL NOT NULL,
-                last_login REAL,
-                preferences TEXT
-            )
-            ''')
-            
-            # Create saved_filters table
-            cur.execute('''
-            CREATE TABLE IF NOT EXISTS saved_filters (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                filter_config TEXT NOT NULL,
-                created_at REAL NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
-            ''')
-            
-            conn.commit()
-            logger.info("Auth database tables created successfully")
-        except Error as e:
-            logger.error(f"Error creating auth database tables: {e}")
-        finally:
-            conn.close()
-
-def hash_password(password):
-    """Hash a password using SHA-256."""
-    return hashlib.sha256(password.encode()).hexdigest()
+# Initialize databases when the application starts
+with app.app_context():
+    init_db()
+    init_auth_db()
+    logger.info("Databases initialized")
 
 def rate_limit(f):
     """Rate limiting decorator"""
@@ -123,8 +103,6 @@ def rate_limit(f):
     def decorated_function(*args, **kwargs):
         client_ip = request.remote_addr
         current_time = time.time()
-        
-        # Initialize or reset client's request count
         if client_ip not in RATE_LIMIT['clients'] or \
            current_time - RATE_LIMIT['clients'][client_ip]['start_time'] > RATE_LIMIT['per_seconds']:
             RATE_LIMIT['clients'][client_ip] = {
@@ -132,17 +110,13 @@ def rate_limit(f):
                 'start_time': current_time
             }
         else:
-            # Increment request count
             RATE_LIMIT['clients'][client_ip]['count'] += 1
-            
-        # Check if limit exceeded
         if RATE_LIMIT['clients'][client_ip]['count'] > RATE_LIMIT['requests']:
             logger.warning(f"Rate limit exceeded for {client_ip}")
             return jsonify({
                 'error': 'Rate limit exceeded',
                 'message': 'Too many requests. Please try again later.'
             }), 429
-            
         return f(*args, **kwargs)
     return decorated_function
 
@@ -151,68 +125,17 @@ def cache_response(timeout=CACHE_TIMEOUT):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            # Generate a cache key based on the request path and query parameters
             cache_key = request.path + '?' + request.query_string.decode('utf-8')
-            
-            # Check if we have a valid cached response
             if cache_key in cache['data'] and time.time() - cache['timestamp'][cache_key] < timeout:
                 logger.info(f"Cache hit for {cache_key}")
                 return cache['data'][cache_key]
-            
-            # If not in cache or expired, get fresh data
             response = f(*args, **kwargs)
-            
-            # Cache the response
             cache['data'][cache_key] = response
             cache['timestamp'][cache_key] = time.time()
             logger.info(f"Cached response for {cache_key}")
-            
             return response
         return decorated_function
     return decorator
-
-def token_required(f):
-    """JWT token verification decorator."""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        
-        # Get token from Authorization header
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            if auth_header.startswith('Bearer '):
-                token = auth_header.split(' ')[1]
-        
-        if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
-        
-        try:
-            # Decode the token
-            data = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
-            
-            # Get the user from the database
-            conn = get_db_connection()
-            if conn is None:
-                return jsonify({"error": "Database connection failed"}), 500
-                
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM users WHERE id = ?', (data['user_id'],))
-            current_user = cursor.fetchone()
-            conn.close()
-            
-            if not current_user:
-                return jsonify({'message': 'User not found!'}), 401
-                
-        except jwt.ExpiredSignatureError:
-            return jsonify({'message': 'Token has expired!'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'message': 'Invalid token!'}), 401
-            
-        # Pass the current user to the route function
-        return f(dict(current_user), *args, **kwargs)
-    
-    return decorated
 
 # Routes
 @app.route('/', methods=['GET'])
@@ -222,6 +145,7 @@ def home():
         "message": "Welcome to the Reddit Sentiment Analysis API!",
         "version": "2.0.0",
         "endpoints": {
+            "/search": "Live search Reddit posts",
             "/posts": "Get all posts with filtering options",
             "/posts/<post_id>": "Get a specific post by ID",
             "/stats": "Get statistical information about the posts",
@@ -240,14 +164,11 @@ def health():
     conn = get_db_connection()
     if conn is None:
         return jsonify({"status": "error", "message": "Database connection failed"}), 500
-    
     try:
         cur = conn.cursor()
         cur.execute("SELECT COUNT(*) FROM posts")
         count = cur.fetchone()[0]
-        
-        uptime = int(time.time() - app.start_time)
-        
+        uptime = int(time.time() - getattr(app, 'start_time', time.time()))
         return jsonify({
             "status": "healthy",
             "database": {
@@ -263,23 +184,42 @@ def health():
     finally:
         conn.close()
 
+@app.route('/search', methods=['GET'])
+@rate_limit
+def search_reddit():
+    """Live search on Reddit across all subreddits."""
+    q = request.args.get('q')
+    if not q:
+        return jsonify({'error': 'Missing search term'}), 400
+
+    try:
+        results = []
+        for submission in reddit.subreddit('all').search(q, limit=25):
+            text = submission.title + (submission.selftext or "")
+            sent = analyzer.polarity_scores(text)
+            results.append({
+                'id': submission.id,
+                'title': submission.title,
+                'subreddit': submission.subreddit.display_name,
+                'score': submission.score,
+                'num_comments': submission.num_comments,
+                'upvote_ratio': submission.upvote_ratio,
+                'url': submission.url,
+                'created_utc': submission.created_utc,
+                'sentiment': sent
+            })
+        return jsonify(results)
+    except Exception as e:
+        logger.error(f"Error in live search: {e}")
+        return jsonify({'error': 'Search failed'}), 500
+
 @app.route('/posts', methods=['GET'])
 @rate_limit
 @cache_response()
 def get_posts():
     """
     Retrieve all posts from the database with optional filters.
-    Supported query parameters:
-      - min_score, max_score: Filter by post score.
-      - min_comments, max_comments: Filter by number of comments.
-      - min_upvote_ratio, max_upvote_ratio: Filter by upvote ratio.
-      - start_date, end_date: Filter by creation time (epoch timestamp or ISO format).
-      - sentiment: Filter by sentiment type ('positive', 'negative', 'neutral').
-      - subreddit: Filter by subreddit name.
-      - limit: Limit the number of results.
-      - offset: Offset for pagination.
-      - sort_by: Field to sort by.
-      - order: 'asc' or 'desc' for sorting order.
+    Supports numeric, date, sentiment, subreddit filters, and text search.
     """
     conn = get_db_connection()
     if conn is None:
@@ -289,166 +229,117 @@ def get_posts():
     filters = []
     params = []
 
-    # Filter by score
+    # Numeric filters
     if request.args.get('min_score'):
         filters.append("score >= ?")
-        params.append(int(request.args.get('min_score')))
+        params.append(int(request.args['min_score']))
     if request.args.get('max_score'):
         filters.append("score <= ?")
-        params.append(int(request.args.get('max_score')))
-
-    # Filter by number of comments
+        params.append(int(request.args['max_score']))
     if request.args.get('min_comments'):
         filters.append("num_comments >= ?")
-        params.append(int(request.args.get('min_comments')))
+        params.append(int(request.args['min_comments']))
     if request.args.get('max_comments'):
         filters.append("num_comments <= ?")
-        params.append(int(request.args.get('max_comments')))
-
-    # Filter by upvote ratio
+        params.append(int(request.args['max_comments']))
     if request.args.get('min_upvote_ratio'):
         filters.append("upvote_ratio >= ?")
-        params.append(float(request.args.get('min_upvote_ratio')))
+        params.append(float(request.args['min_upvote_ratio']))
     if request.args.get('max_upvote_ratio'):
         filters.append("upvote_ratio <= ?")
-        params.append(float(request.args.get('max_upvote_ratio')))
+        params.append(float(request.args['max_upvote_ratio']))
 
-    # Filter by date range (created_utc, given as epoch timestamps or ISO format)
+    # Date filters
     if request.args.get('start_date'):
-        start_date = request.args.get('start_date')
+        sd = request.args['start_date']
         try:
-            # Check if it's an ISO format date
-            if not start_date.isdigit():
-                dt = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
-                start_timestamp = dt.timestamp()
-            else:
-                start_timestamp = float(start_date)
+            ts = float(sd) if sd.isdigit() else datetime.fromisoformat(sd.replace('Z','+00:00')).timestamp()
             filters.append("created_utc >= ?")
-            params.append(start_timestamp)
-        except ValueError:
-            logger.warning(f"Invalid start_date format: {start_date}")
+            params.append(ts)
+        except:
             return jsonify({"error": "Invalid start_date format"}), 400
-            
     if request.args.get('end_date'):
-        end_date = request.args.get('end_date')
+        ed = request.args['end_date']
         try:
-            # Check if it's an ISO format date
-            if not end_date.isdigit():
-                dt = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
-                end_timestamp = dt.timestamp()
-            else:
-                end_timestamp = float(end_date)
+            ts = float(ed) if ed.isdigit() else datetime.fromisoformat(ed.replace('Z','+00:00')).timestamp()
             filters.append("created_utc <= ?")
-            params.append(end_timestamp)
-        except ValueError:
-            logger.warning(f"Invalid end_date format: {end_date}")
+            params.append(ts)
+        except:
             return jsonify({"error": "Invalid end_date format"}), 400
 
-    # Filter by sentiment (using the compound score)
+    # Sentiment filter
     sentiment = request.args.get('sentiment')
     if sentiment:
-        sentiment = sentiment.lower()
-        if sentiment == 'positive':
+        s = sentiment.lower()
+        if s == 'positive':
             filters.append("sentiment_compound > ?")
             params.append(0.05)
-        elif sentiment == 'negative':
+        elif s == 'negative':
             filters.append("sentiment_compound < ?")
             params.append(-0.05)
-        elif sentiment == 'neutral':
+        elif s == 'neutral':
             filters.append("sentiment_compound BETWEEN ? AND ?")
             params.extend([-0.05, 0.05])
 
-    # Filter by subreddit (extracting from the url or author field if not stored directly)
+    # Subreddit filter
     if request.args.get('subreddit'):
-        subreddit = request.args.get('subreddit').lower()
-        # This assumes the URL contains the subreddit name in a predictable pattern
+        sr = request.args['subreddit'].lower()
         filters.append("(url LIKE ? OR author LIKE ?)")
-        params.extend([f"%/r/{subreddit}/%", f"%{subreddit}%"])
+        params.extend([f"%/r/{sr}/%", f"%{sr}%"])
 
-    # Combine filters into the query
+    # Text search
+    search = request.args.get('search')
+    if search:
+        wildcard = f"%{search}%"
+        filters.append("(title LIKE ? OR selftext LIKE ?)")
+        params.extend([wildcard, wildcard])
+
+    # Combine filters
     if filters:
         query += " WHERE " + " AND ".join(filters)
-    
-    # Sort results
+
+    # Sorting
     sort_by = request.args.get('sort_by', 'created_utc')
-    # Validate sort field to prevent SQL injection
-    valid_sort_fields = ['id', 'title', 'score', 'num_comments', 'upvote_ratio', 
-                        'url', 'author', 'created_utc', 'sentiment_compound']
-    if sort_by not in valid_sort_fields:
-        sort_by = 'created_utc'  # Default if invalid
-    
-    order = request.args.get('order', 'desc').upper()
-    if order not in ['ASC', 'DESC']:
-        order = 'DESC'  # Default if invalid
-        
+    valid = ['id','title','score','num_comments','upvote_ratio','url','author','created_utc','sentiment_compound']
+    if sort_by not in valid:
+        sort_by = 'created_utc'
+    order = request.args.get('order','desc').upper()
+    if order not in ['ASC','DESC']:
+        order = 'DESC'
     query += f" ORDER BY {sort_by} {order}"
-    
+
     # Pagination
     if request.args.get('limit'):
         try:
-            limit = int(request.args.get('limit'))
-            if limit > 0:
-                query += " LIMIT ?"
-                params.append(limit)
-        except ValueError:
-            logger.warning(f"Invalid limit parameter: {request.args.get('limit')}")
-    
+            query += " LIMIT ?"
+            params.append(int(request.args['limit']))
+        except:
+            pass
     if request.args.get('offset'):
         try:
-            offset = int(request.args.get('offset'))
-            if offset >= 0:
-                query += " OFFSET ?"
-                params.append(offset)
-        except ValueError:
-            logger.warning(f"Invalid offset parameter: {request.args.get('offset')}")
+            query += " OFFSET ?"
+            params.append(int(request.args['offset']))
+        except:
+            pass
 
     logger.info(f"Executing query: {query} with params {params}")
-    
+
     try:
         cur = conn.cursor()
         cur.execute(query, tuple(params))
-        posts = cur.fetchall()
+        rows = cur.fetchall()
     except Error as e:
         logger.error(f"Database query error: {e}")
         conn.close()
         return jsonify({"error": str(e)}), 500
 
     conn.close()
-
-    # Convert rows to dictionaries
-    posts_list = [dict(post) for post in posts]
-    
-    # Add human-readable dates
+    posts_list = [dict(r) for r in rows]
     for post in posts_list:
         post['created_date'] = datetime.fromtimestamp(post['created_utc']).isoformat()
-    
+
     return jsonify(posts_list)
 
-@app.route('/posts/<post_id>', methods=['GET'])
-@rate_limit
-@cache_response()
-def get_post(post_id):
-    """Retrieve a single post by its ID."""
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Failed to connect to database"}), 500
-
-    try:
-        post = conn.execute('SELECT * FROM posts WHERE id = ?', (post_id,)).fetchone()
-    except Error as e:
-        logger.error(f"Error retrieving post {post_id}: {e}")
-        conn.close()
-        return jsonify({"error": str(e)}), 500
-
-    conn.close()
-
-    if post is None:
-        return jsonify({'error': 'Post not found'}), 404
-    
-    post_dict = dict(post)
-    post_dict['created_date'] = datetime.fromtimestamp(post['created_utc']).isoformat()
-    
-    return jsonify(post_dict)
 
 @app.route('/stats', methods=['GET'])
 @rate_limit
@@ -622,215 +513,18 @@ def get_subreddits():
     
     return jsonify(subreddits)
 
-# Authentication Routes
-@app.route('/auth/register', methods=['POST'])
-def register():
-    """Register a new user."""
-    data = request.get_json()
-    
-    # Validate required fields
-    if not data or not data.get('username') or not data.get('password') or not data.get('email'):
-        return jsonify({'message': 'Missing required fields!'}), 400
-    
-    username = data.get('username')
-    password = data.get('password')
-    email = data.get('email')
-    
-    # Validate email format (basic validation)
-    if '@' not in email or '.' not in email.split('@')[1]:
-        return jsonify({'message': 'Invalid email format!'}), 400
-    
-    # Validate password length
-    if len(password) < 6:
-        return jsonify({'message': 'Password must be at least 6 characters!'}), 400
-    
-    # Hash the password
-    password_hash = hash_password(password)
-    
-    # Connect to the database
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    try:
-        # Check if username or email already exist
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM users WHERE username = ? OR email = ?', (username, email))
-        if cursor.fetchone():
-            conn.close()
-            return jsonify({'message': 'Username or email already exists!'}), 409
-        
-        # Insert the new user
-        cursor.execute(
-            'INSERT INTO users (username, email, password_hash, created_at, preferences) VALUES (?, ?, ?, ?, ?)',
-            (username, email, password_hash, datetime.now().timestamp(), '{}')
-        )
-        
-        conn.commit()
-        
-        # Get the new user ID
-        cursor.execute('SELECT id FROM users WHERE username = ?', (username,))
-        user_id = cursor.fetchone()[0]
-        
-        conn.close()
-        
-        # Generate token
-        expiration = int((datetime.now() + datetime.timedelta(days=JWT_EXPIRATION_DAYS)).timestamp())
-        token = jwt.encode({
-            'user_id': user_id,
-            'exp': expiration
-        }, JWT_SECRET_KEY, algorithm="HS256")
-        
-        return jsonify({
-            'message': 'User registered successfully!',
-            'token': token,
-            'user': {
-                'id': user_id,
-                'username': username,
-                'email': email
-            }
-        }), 201
-    
-    except Exception as e:
-        if conn:
-            conn.rollback()
-            conn.close()
-        logger.error(f"Registration error: {e}")
-        return jsonify({'message': f'Registration failed: {str(e)}'}), 500
-
-@app.route('/auth/login', methods=['POST'])
-def login():
-    """Login and get an access token."""
-    data = request.get_json()
-    
-    # Validate required fields
-    if not data or not data.get('username') or not data.get('password'):
-        return jsonify({'message': 'Missing username or password!'}), 400
-    
-    username = data.get('username')
-    password = data.get('password')
-    
-    # Hash the password
-    password_hash = hash_password(password)
-    
-    # Connect to the database
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    
-    # Check if the user exists
-    cursor.execute('SELECT * FROM users WHERE (username = ? OR email = ?) AND password_hash = ?', 
-                 (username, username, password_hash))
-    user = cursor.fetchone()
-    
-    if not user:
-        conn.close()
-        return jsonify({'message': 'Invalid username or password!'}), 401
-    
-    # Update last login time
-    cursor.execute('UPDATE users SET last_login = ? WHERE id = ?', 
-                 (datetime.now().timestamp(), user['id']))
-    conn.commit()
-    
-    # Parse preferences JSON if it exists
-    preferences = {}
-    if user['preferences']:
-        try:
-            preferences = json.loads(user['preferences'])
-        except:
-            logger.error(f"Failed to parse preferences for user {user['id']}")
-    
-    conn.close()
-    
-    # Generate token
-    expiration = int((datetime.now() + datetime.timedelta(days=JWT_EXPIRATION_DAYS)).timestamp())
-    token = jwt.encode({
-        'user_id': user['id'],
-        'exp': expiration
-    }, JWT_SECRET_KEY, algorithm="HS256")
-    
-    return jsonify({
-        'message': 'Login successful!',
-        'token': token,
-        'user': {
-            'id': user['id'],
-            'username': user['username'],
-            'email': user['email'],
-            'preferences': preferences
-        }
-    }), 200
-
-@app.route('/auth/profile', methods=['GET'])
+# User filter related endpoint (protected)
+@app.route('/user/filters', methods=['POST'])
 @token_required
-def get_profile(current_user):
-    """Get the current user's profile."""
-    # Parse preferences JSON if it exists
-    preferences = {}
-    if current_user['preferences']:
-        try:
-            preferences = json.loads(current_user['preferences'])
-        except:
-            logger.error(f"Failed to parse preferences for user {current_user['id']}")
-    
-    return jsonify({
-        'user': {
-            'id': current_user['id'],
-            'username': current_user['username'],
-            'email': current_user['email'],
-            'preferences': preferences,
-            'created_at': current_user['created_at'],
-            'last_login': current_user['last_login']
-        }
-    }), 200
-
-@app.route('/auth/preferences', methods=['PUT'])
-@token_required
-def update_preferences(current_user):
-    """Update user preferences."""
-    data = request.get_json()
-    
-    if not data:
-        return jsonify({'message': 'No data provided!'}), 400
-    
-    # Connect to the database
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    try:
-        # Update preferences
-        cursor = conn.cursor()
-        cursor.execute('UPDATE users SET preferences = ? WHERE id = ?', 
-                     (json.dumps(data), current_user['id']))
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            'message': 'Preferences updated successfully!',
-            'preferences': data
-        }), 200
-        
-    except Exception as e:
-        if conn:
-            conn.rollback()
-            conn.close()
-        logger.error(f"Preferences update error: {e}")
-        return jsonify({'message': f'Failed to update preferences: {str(e)}'}), 500
-
-@app.route('/auth/filters', methods=['POST'])
-@token_required
-def save_filter(current_user):
-    """Save a filter configuration."""
+def save_user_filter(current_user):
+    """Save a filter configuration for a logged-in user."""
     data = request.get_json()
     
     # Validate required fields
     if not data or not data.get('name') or not data.get('filter_config'):
         return jsonify({'message': 'Missing required fields!'}), 400
     
-   name = data.get('name')
+    name = data.get('name')
     filter_config = data.get('filter_config')
     
     # Connect to the database
@@ -843,7 +537,7 @@ def save_filter(current_user):
         cursor = conn.cursor()
         cursor.execute(
             'INSERT INTO saved_filters (user_id, name, filter_config, created_at) VALUES (?, ?, ?, ?)',
-            (current_user['id'], name, json.dumps(filter_config), datetime.now().timestamp())
+            (current_user['id'], name, json.dumps(filter_config), time.time())
         )
         
         conn.commit()
@@ -870,75 +564,6 @@ def save_filter(current_user):
         logger.error(f"Save filter error: {e}")
         return jsonify({'message': f'Failed to save filter: {str(e)}'}), 500
 
-@app.route('/auth/filters', methods=['GET'])
-@token_required
-def get_filters(current_user):
-    """Get saved filters for the current user."""
-    # Connect to the database
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    
-    # Get all filters for the user
-    cursor.execute('SELECT * FROM saved_filters WHERE user_id = ? ORDER BY created_at DESC', (current_user['id'],))
-    filters = cursor.fetchall()
-    
-    conn.close()
-    
-    # Convert to list of dictionaries
-    result = []
-    for f in filters:
-        filter_dict = dict(f)
-        try:
-            # Parse the filter_config JSON
-            filter_dict['filter_config'] = json.loads(filter_dict['filter_config'])
-        except:
-            logger.error(f"Failed to parse filter_config for filter {f['id']}")
-            filter_dict['filter_config'] = {}
-        
-        result.append(filter_dict)
-    
-    return jsonify({
-        'filters': result
-    }), 200
-
-@app.route('/auth/filters/<int:filter_id>', methods=['DELETE'])
-@token_required
-def delete_filter(current_user, filter_id):
-    """Delete a saved filter."""
-    # Connect to the database
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    cursor = conn.cursor()
-    
-    # Check if the filter exists and belongs to the user
-    cursor.execute('SELECT * FROM saved_filters WHERE id = ? AND user_id = ?', (filter_id, current_user['id']))
-    if not cursor.fetchone():
-        conn.close()
-        return jsonify({'message': 'Filter not found or unauthorized!'}), 404
-    
-    try:
-        # Delete the filter
-        cursor.execute('DELETE FROM saved_filters WHERE id = ?', (filter_id,))
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            'message': 'Filter deleted successfully!'
-        }), 200
-        
-    except Exception as e:
-        if conn:
-            conn.rollback()
-            conn.close()
-        logger.error(f"Delete filter error: {e}")
-        return jsonify({'message': f'Failed to delete filter: {str(e)}'}), 500
-
 @app.errorhandler(404)
 def not_found(e):
     return jsonify({"error": "Resource not found"}), 404
@@ -955,12 +580,6 @@ def server_error(e):
 if __name__ == '__main__':
     # Store start time for uptime calculation
     app.start_time = time.time()
-    
-    # Initialize database with indexes
-    init_db()
-    
-    # Initialize authentication database
-    init_auth_db()
     
     # Run the application
     debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'

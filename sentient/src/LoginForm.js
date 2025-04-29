@@ -13,8 +13,9 @@ const LoginForm = ({ onSuccess, onSwitchToRegister }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate form
     if (!username || !password) {
-      setError('Please enter both username and password');
+      setError('Please fill in all fields');
       return;
     }
     
