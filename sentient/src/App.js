@@ -1,4 +1,4 @@
-// App.js with Live Reddit Search Integration
+// App.js with improved Reddit Live Search Integration
 import React, { useState, useEffect } from 'react';
 import {
   BarChart, Bar,
@@ -19,6 +19,7 @@ function App() {
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isLiveSearch, setIsLiveSearch] = useState(false);
 
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,6 +35,7 @@ function App() {
     searchTerm: '',
     startDate: '',
     endDate: '',
+    subreddit: '', // Added subreddit filter
   });
 
   // State for date range selection
@@ -57,6 +59,13 @@ function App() {
 
   // State for export dropdown
   const [showExportOptions, setShowExportOptions] = useState(false);
+  
+  // State for search options
+  const [searchOptions, setSearchOptions] = useState({
+    searchMethod: 'database', // 'database' or 'live'
+    sortMethod: 'relevance',  // 'relevance', 'hot', 'new', 'top'
+    timeFilter: 'all'         // 'hour', 'day', 'week', 'month', 'year', 'all'
+  });
 
   // Use the auth context
   const { currentUser, updatePreferences } = useAuth();
@@ -68,55 +77,58 @@ function App() {
   const fetchPosts = () => {
     setLoading(true);
     setError(null);
+    setIsLiveSearch(false);
 
-    // Live search if searchTerm is set
-    if (filters.searchTerm) {
-      const url = `${BASE_URL}/search?q=${encodeURIComponent(filters.searchTerm)}`;
-      fetch(url)
-        .then(response => {
-          if (!response.ok) throw new Error('Search failed');
-          return response.json();
-        })
-        .then(data => {
-          setCurrentPage(1);
-          setPosts(data);
-          setFilteredPosts(data);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("Live search error:", err);
-          setError(err);
-          setLoading(false);
-        });
-      return;
+    // Build URL and parameters based on search method and filters
+    let url = `${BASE_URL}/posts`;
+    const params = new URLSearchParams();
+    
+    // If search term is set, determine if we should use live search
+    if (filters.searchTerm && searchOptions.searchMethod === 'live') {
+      setIsLiveSearch(true);
+      url = `${BASE_URL}/search`;
+      params.append('q', filters.searchTerm);
+      params.append('sort', searchOptions.sortMethod);
+      params.append('time_filter', searchOptions.timeFilter);
+      
+      if (filters.subreddit) {
+        params.append('subreddit', filters.subreddit);
+      }
+    } else {
+      // Regular database search with all filters
+      if (filters.minScore) params.append('min_score', filters.minScore);
+      if (filters.maxScore) params.append('max_score', filters.maxScore);
+      if (filters.minComments) params.append('min_comments', filters.minComments);
+      if (filters.maxComments) params.append('max_comments', filters.maxComments);
+      if (filters.sentiment) params.append('sentiment', filters.sentiment);
+      if (filters.subreddit) params.append('subreddit', filters.subreddit);
+      if (filters.searchTerm) params.append('search', filters.searchTerm);
+
+      const startTs = dateToTimestamp(filters.startDate);
+      const endTs = dateToTimestamp(filters.endDate);
+      if (startTs) params.append('start_date', startTs);
+      if (endTs) params.append('end_date', endTs + 86400);
     }
 
-    // Otherwise, fetch from local DB
-    const params = new URLSearchParams();
-    if (filters.minScore)    params.append('min_score', filters.minScore);
-    if (filters.maxScore)    params.append('max_score', filters.maxScore);
-    if (filters.minComments) params.append('min_comments', filters.minComments);
-    if (filters.maxComments) params.append('max_comments', filters.maxComments);
-    if (filters.sentiment)   params.append('sentiment', filters.sentiment);
-
-    const startTs = dateToTimestamp(filters.startDate);
-    const endTs   = dateToTimestamp(filters.endDate);
-    if (startTs) params.append('start_date', startTs);
-    if (endTs)   params.append('end_date', endTs + 86400);
-
-    const url = `${BASE_URL}/posts${params.toString() ? '?' + params.toString() : ''}`;
+    // Final URL with query parameters
+    const finalUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
+    
+    // Set up request options
     const fetchOptions = {
       method: 'GET',
       headers: { 'Accept': 'application/json' }
     };
+
+    // Add auth token if user is logged in
     if (currentUser) {
       const token = localStorage.getItem('authToken');
       if (token) fetchOptions.headers['Authorization'] = `Bearer ${token}`;
     }
 
-    fetch(url, fetchOptions)
+    // Execute the fetch request
+    fetch(finalUrl, fetchOptions)
       .then(response => {
-        if (!response.ok) throw new Error('Failed to fetch posts.');
+        if (!response.ok) throw new Error(`Failed to fetch posts (${response.status}): ${response.statusText}`);
         return response.json();
       })
       .then(data => {
@@ -154,24 +166,32 @@ function App() {
       if (currentUser.preferences.defaultVisualization) {
         setVisualizationType(currentUser.preferences.defaultVisualization);
       }
+      if (currentUser.preferences.searchMethod) {
+        setSearchOptions(prev => ({ ...prev, searchMethod: currentUser.preferences.searchMethod }));
+      }
     }
   }, []);
 
   // Apply client-side filters & sort
   const applyClientSideFilters = (data) => {
     let result = [...data];
-    if (filters.searchTerm) {
+    
+    // Only apply client-side text search if it's not already handled by the API
+    if (filters.searchTerm && !isLiveSearch && searchOptions.searchMethod !== 'live') {
       const term = filters.searchTerm.toLowerCase();
       result = result.filter(post =>
         post.title.toLowerCase().includes(term) ||
         (post.selftext && post.selftext.toLowerCase().includes(term))
       );
     }
+    
+    // Apply sorting
     result.sort((a, b) => {
       if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'asc' ? -1 : 1;
       if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     });
+    
     setFilteredPosts(result);
   };
 
@@ -205,6 +225,26 @@ function App() {
   // Search input change
   const handleSearchChange = (e) => {
     setFilters(prev => ({ ...prev, searchTerm: e.target.value }));
+  };
+  
+  // Search options change handler
+  const handleSearchOptionsChange = (e) => {
+    const { name, value } = e.target;
+    setSearchOptions(prev => ({ ...prev, [name]: value }));
+    
+    // Save preference if user is logged in
+    if (currentUser && name === 'searchMethod') {
+      updatePreferences({ 
+        ...currentUser.preferences, 
+        searchMethod: value 
+      });
+    }
+  };
+  
+  // Handle search submission
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    fetchPosts();
   };
 
   // Date range picker
@@ -250,7 +290,8 @@ function App() {
   const indexOfFirst = indexOfLast - postsPerPage;
   const currentPosts = filteredPosts.slice(indexOfFirst, indexOfLast);
   const paginate = page => setCurrentPage(page);
-  // Data export functions
+  
+  // Data export functions - remaining code unchanged
   // Convert to CSV format
   const convertToCSV = (data) => {
     if (data.length === 0) return '';
@@ -401,7 +442,7 @@ function App() {
       ? (filteredPosts.reduce((sum, post) => sum + post.num_comments, 0) / totalPosts).toFixed(2)
       : 'N/A';
     
-      const avgSentiment = totalPosts > 0
+    const avgSentiment = totalPosts > 0
       ? (filteredPosts.reduce((sum, post) => sum + post.sentiment_compound, 0) / totalPosts).toFixed(2)
       : 'N/A';
     
@@ -796,6 +837,17 @@ function App() {
               </div>
               
               <div className="filter-group">
+                <label>Subreddit:</label>
+                <input
+                  type="text"
+                  name="subreddit"
+                  placeholder="e.g. worldnews, politics"
+                  value={filters.subreddit}
+                  onChange={handleFilterChange}
+                />
+              </div>
+              
+              <div className="filter-group">
                 <label>Date Range:</label>
                 <select
                   value={dateRangeOption}
@@ -871,6 +923,12 @@ function App() {
               </span>
             </div>
             <div className="stat-item">
+              <span>Data Source:</span>
+              <span>
+                {isLiveSearch ? 'Live Reddit API' : 'Local Database'}
+              </span>
+            </div>
+            <div className="stat-item">
               <span>Date Range:</span>
               <span>
                 {dateRangeOption === 'all' 
@@ -891,13 +949,60 @@ function App() {
         <main className="main-content">
           <div className="toolbar">
             <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search posts..."
-                value={filters.searchTerm}
-                onChange={handleSearchChange}
-                className="search-input"
-              />
+              <form onSubmit={handleSearchSubmit} className="search-form">
+                <input
+                  type="text"
+                  placeholder="Search posts..."
+                  value={filters.searchTerm}
+                  onChange={handleSearchChange}
+                  className="search-input"
+                />
+                <div className="search-options">
+                  <select 
+                    name="searchMethod" 
+                    value={searchOptions.searchMethod}
+                    onChange={handleSearchOptionsChange}
+                    className="search-option-select"
+                  >
+                    <option value="database">Database Search</option>
+                    <option value="live">Live Reddit Search</option>
+                  </select>
+                  
+                  {searchOptions.searchMethod === 'live' && (
+                    <>
+                      <select 
+                        name="sortMethod" 
+                        value={searchOptions.sortMethod}
+                        onChange={handleSearchOptionsChange}
+                        className="search-option-select"
+                      >
+                        <option value="relevance">Relevance</option>
+                        <option value="hot">Hot</option>
+                        <option value="new">New</option>
+                        <option value="top">Top</option>
+                      </select>
+                      
+                      <select 
+                        name="timeFilter" 
+                        value={searchOptions.timeFilter}
+                        onChange={handleSearchOptionsChange}
+                        className="search-option-select"
+                      >
+                        <option value="all">All Time</option>
+                        <option value="hour">Past Hour</option>
+                        <option value="day">Past Day</option>
+                        <option value="week">Past Week</option>
+                        <option value="month">Past Month</option>
+                        <option value="year">Past Year</option>
+                      </select>
+                    </>
+                  )}
+                  
+                  <button type="submit" className="search-button">
+                    {searchOptions.searchMethod === 'live' ? 'Live Search' : 'Search'}
+                  </button>
+                </div>
+              </form>
             </div>
             <div className="view-options">
               <div className="export-container">
@@ -993,7 +1098,10 @@ function App() {
           </div>
 
           <div className="posts-container">
-            <h2>Reddit Posts</h2>
+            <h2>
+              {isLiveSearch ? 'Live Reddit Posts' : 'Reddit Posts'}
+              {filters.searchTerm && <span className="search-term-display"> for "{filters.searchTerm}"</span>}
+            </h2>
             <table className="posts-table">
               <thead>
                 <tr>
@@ -1041,24 +1149,35 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {currentPosts.map(post => (
-                  <tr key={post.id}>
-                    <td className="post-title-cell">{post.title}</td>
-                    <td>{post.score}</td>
-                    <td>{post.num_comments}</td>
-                    <td>
-                      <div className={`sentiment-badge ${getSentimentClass(post.sentiment_compound)}`}>
-                        {post.sentiment_compound.toFixed(2)}
-                      </div>
-                    </td>
-                    <td>{formatDate(post.created_utc)}</td>
-                    <td>
-                      <a href={post.url} target="_blank" rel="noopener noreferrer" className="view-button">
-                        View Post
-                      </a>
+                {currentPosts.length > 0 ? (
+                  currentPosts.map(post => (
+                    <tr key={post.id}>
+                      <td className="post-title-cell">
+                        {post.title}
+                        {post.subreddit && <span className="subreddit-tag">r/{post.subreddit}</span>}
+                      </td>
+                      <td>{post.score}</td>
+                      <td>{post.num_comments}</td>
+                      <td>
+                        <div className={`sentiment-badge ${getSentimentClass(post.sentiment_compound)}`}>
+                          {post.sentiment_compound.toFixed(2)}
+                        </div>
+                      </td>
+                      <td>{formatDate(post.created_utc)}</td>
+                      <td>
+                        <a href={post.url} target="_blank" rel="noopener noreferrer" className="view-button">
+                          View Post
+                        </a>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="no-posts-message">
+                      No posts found. Try adjusting your filters or search term.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
 
@@ -1071,7 +1190,7 @@ function App() {
                 Previous
               </button>
               <div className="page-info">
-                Page {currentPage} of {Math.ceil(filteredPosts.length / postsPerPage)}
+                Page {currentPage} of {Math.ceil(filteredPosts.length / postsPerPage) || 1}
               </div>
               <button
                 onClick={() => paginate(currentPage + 1)}
@@ -1108,4 +1227,5 @@ function App() {
   );
 }
 
+// Make sure to include this default export
 export default App;

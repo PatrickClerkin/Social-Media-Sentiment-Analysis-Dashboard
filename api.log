@@ -320,3 +320,31 @@
 2025-04-26 02:49:59,677 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:49:59] "GET /auth/filters HTTP/1.1" 200 -
 2025-04-26 02:50:06,806 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:50:06] "[33mGET /search?q=football HTTP/1.1[0m" 404 -
 2025-04-26 02:50:09,083 - werkzeug - INFO - 127.0.0.1 - - [26/Apr/2025 02:50:09] "[33mGET /search?q=football HTTP/1.1[0m" 404 -
+2025-04-29 14:27:03,104 - __main__ - INFO - Database indexes created successfully
+2025-04-29 14:27:03,113 - auth - INFO - Auth database tables created successfully
+2025-04-29 14:27:03,115 - __main__ - INFO - Databases initialized
+2025-04-29 14:27:03,119 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-29 14:27:03,193 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.19:5000
+2025-04-29 14:27:03,193 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-29 14:41:10,253 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:10] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-29 14:41:10,240 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-29 14:41:10,258 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:10] "OPTIONS /auth/profile HTTP/1.1" 200 -
+2025-04-29 14:41:10,311 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:10] "[31m[1mGET /auth/profile HTTP/1.1[0m" 401 -
+2025-04-29 14:41:10,314 - __main__ - INFO - Cached response for /posts?
+2025-04-29 14:41:10,321 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:10] "GET /posts HTTP/1.1" 200 -
+2025-04-29 14:41:10,327 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:10] "[31m[1mGET /auth/profile HTTP/1.1[0m" 401 -
+2025-04-29 14:41:10,339 - __main__ - INFO - Cache hit for /posts?
+2025-04-29 14:41:10,343 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:10] "GET /posts HTTP/1.1" 200 -
+2025-04-29 14:41:25,863 - __main__ - INFO - Cached response for /posts?search=fireland
+2025-04-29 14:41:25,867 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:25] "[31m[1mGET /posts?search=fireland HTTP/1.1[0m" 400 -
+2025-04-29 14:41:27,621 - __main__ - INFO - Cache hit for /posts?search=fireland
+2025-04-29 14:41:27,623 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:27] "[31m[1mGET /posts?search=fireland HTTP/1.1[0m" 400 -
+2025-04-29 14:41:28,120 - __main__ - INFO - Cache hit for /posts?search=fireland
+2025-04-29 14:41:28,121 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:28] "[31m[1mGET /posts?search=fireland HTTP/1.1[0m" 400 -
+2025-04-29 14:41:35,112 - __main__ - INFO - Cache hit for /posts?search=fireland
+2025-04-29 14:41:35,114 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:35] "[31m[1mGET /posts?search=fireland HTTP/1.1[0m" 400 -
+2025-04-29 14:41:35,623 - __main__ - INFO - Cache hit for /posts?search=fireland
+2025-04-29 14:41:35,626 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:35] "[31m[1mGET /posts?search=fireland HTTP/1.1[0m" 400 -

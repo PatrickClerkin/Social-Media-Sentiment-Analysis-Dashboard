@@ -1,3 +1,4 @@
+import praw
 from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 import sqlite3
@@ -12,8 +13,7 @@ import jwt
 import secrets
 import hashlib
 
-# New imports for live Reddit search
-from praw import Reddit
+# Import for sentiment analysis
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 # Import auth blueprint and init_auth_db
@@ -55,12 +55,15 @@ RATE_LIMIT = {
     'clients': {}
 }
 
-# Initialize PRAW & VADER for live search
-reddit = Reddit(
-    client_id=os.environ.get('REDDIT_CLIENT_ID'),
-    client_secret=os.environ.get('REDDIT_CLIENT_SECRET'),
-    user_agent=os.environ.get('REDDIT_USER_AGENT', 'RedditSentimentAPI/1.0')
+# Initialize PRAW for Reddit API
+# Get credentials from environment variables or use your own credentials here
+reddit = praw.Reddit(
+    client_id=os.environ.get('REDDIT_CLIENT_ID', 'YOUR_CLIENT_ID_HERE'),  # Replace with your actual client_id
+    client_secret=os.environ.get('REDDIT_CLIENT_SECRET', 'YOUR_CLIENT_SECRET_HERE'),  # Replace with your actual client_secret
+    user_agent=os.environ.get('REDDIT_USER_AGENT', 'RedditSentimentAPI/1.0 by YourUsername')  # Replace with your username
 )
+
+# Initialize VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
 
 def get_db_connection():
@@ -137,6 +140,18 @@ def cache_response(timeout=CACHE_TIMEOUT):
         return decorated_function
     return decorator
 
+# Helper function to analyze sentiment
+def analyze_sentiment(text):
+    """Analyze sentiment of text using VADER."""
+    try:
+        if not text:
+            return analyzer.polarity_scores("")
+        return analyzer.polarity_scores(text)
+    except Exception as e:
+        logger.error(f"Error analyzing sentiment: {e}")
+        # Return neutral sentiment in case of error
+        return {'neg': 0, 'neu': 1, 'pos': 0, 'compound': 0}
+
 # Routes
 @app.route('/', methods=['GET'])
 def home():
@@ -191,13 +206,37 @@ def search_reddit():
     q = request.args.get('q')
     if not q:
         return jsonify({'error': 'Missing search term'}), 400
-
+    
+    limit = request.args.get('limit', 25, type=int)
+    sort = request.args.get('sort', 'relevance')  # relevance, hot, new, top
+    time_filter = request.args.get('time_filter', 'all')  # hour, day, week, month, year, all
+    subreddit = request.args.get('subreddit', 'all')  # specific subreddit or 'all'
+    
     try:
         results = []
-        for submission in reddit.subreddit('all').search(q, limit=25):
-            text = submission.title + (submission.selftext or "")
-            sent = analyzer.polarity_scores(text)
-            results.append({
+        sr = reddit.subreddit(subreddit)
+        
+        if sort == 'hot':
+            submissions = sr.hot(limit=limit)
+        elif sort == 'new':
+            submissions = sr.new(limit=limit)
+        elif sort == 'top':
+            submissions = sr.top(limit=limit, time_filter=time_filter)
+        else:  # default to search
+            submissions = sr.search(q, limit=limit, sort=sort, time_filter=time_filter)
+        
+        for submission in submissions:
+            # Skip if search term not in title/selftext for hot/new/top
+            if sort in ['hot', 'new', 'top'] and q.lower() not in submission.title.lower() and \
+               (not submission.selftext or q.lower() not in submission.selftext.lower()):
+                continue
+                
+            # Analyze sentiment
+            text = submission.title + " " + (submission.selftext or "")
+            sent = analyze_sentiment(text)
+            
+            # Create post data dictionary
+            post_data = {
                 'id': submission.id,
                 'title': submission.title,
                 'subreddit': submission.subreddit.display_name,
@@ -206,12 +245,25 @@ def search_reddit():
                 'upvote_ratio': submission.upvote_ratio,
                 'url': submission.url,
                 'created_utc': submission.created_utc,
-                'sentiment': sent
-            })
+                'selftext': submission.selftext,
+                'sentiment_compound': sent['compound'],
+                'sentiment_pos': sent['pos'],
+                'sentiment_neu': sent['neu'],
+                'sentiment_neg': sent['neg'],
+                'created_date': datetime.fromtimestamp(submission.created_utc).isoformat()
+            }
+            
+            results.append(post_data)
+            
+            # If using hot/new/top without sufficient results, stop after we have enough
+            if sort in ['hot', 'new', 'top'] and len(results) >= limit:
+                break
+                
         return jsonify(results)
+        
     except Exception as e:
         logger.error(f"Error in live search: {e}")
-        return jsonify({'error': 'Search failed'}), 500
+        return jsonify({'error': f'Search failed: {str(e)}'}), 500
 
 @app.route('/posts', methods=['GET'])
 @rate_limit
@@ -221,6 +273,56 @@ def get_posts():
     Retrieve all posts from the database with optional filters.
     Supports numeric, date, sentiment, subreddit filters, and text search.
     """
+    # Check if this is actually a search request and redirect to live search if so
+    if request.args.get('search'):
+        # First try to get from database
+        conn = get_db_connection()
+        if conn is None:
+            return jsonify({"error": "Failed to connect to database"}), 500
+
+        query = "SELECT * FROM posts"
+        filters = []
+        params = []
+
+        # Add search filter
+        search = request.args.get('search')
+        wildcard = f"%{search}%"
+        filters.append("(title LIKE ? OR selftext LIKE ?)")
+        params.extend([wildcard, wildcard])
+
+        # Combine filters
+        if filters:
+            query += " WHERE " + " AND ".join(filters)
+
+        # Sorting
+        query += " ORDER BY created_utc DESC LIMIT 25"
+
+        try:
+            cur = conn.cursor()
+            cur.execute(query, tuple(params))
+            rows = cur.fetchall()
+        except Error as e:
+            logger.error(f"Database query error: {e}")
+            conn.close()
+            return jsonify({"error": str(e)}), 500
+
+        conn.close()
+        
+        # If we have results from the database, return them
+        if rows and len(rows) > 0:
+            posts_list = [dict(r) for r in rows]
+            for post in posts_list:
+                post['created_date'] = datetime.fromtimestamp(post['created_utc']).isoformat()
+            return jsonify(posts_list)
+        
+        # Otherwise, try live search
+        try:
+            return search_reddit()
+        except Exception as e:
+            logger.error(f"Error redirecting to live search: {e}")
+            # Continue with database search even if live search fails
+    
+    # Regular database search
     conn = get_db_connection()
     if conn is None:
         return jsonify({"error": "Failed to connect to database"}), 500
@@ -339,7 +441,6 @@ def get_posts():
         post['created_date'] = datetime.fromtimestamp(post['created_utc']).isoformat()
 
     return jsonify(posts_list)
-
 
 @app.route('/stats', methods=['GET'])
 @rate_limit
@@ -512,57 +613,6 @@ def get_subreddits():
     conn.close()
     
     return jsonify(subreddits)
-
-# User filter related endpoint (protected)
-@app.route('/user/filters', methods=['POST'])
-@token_required
-def save_user_filter(current_user):
-    """Save a filter configuration for a logged-in user."""
-    data = request.get_json()
-    
-    # Validate required fields
-    if not data or not data.get('name') or not data.get('filter_config'):
-        return jsonify({'message': 'Missing required fields!'}), 400
-    
-    name = data.get('name')
-    filter_config = data.get('filter_config')
-    
-    # Connect to the database
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Database connection failed"}), 500
-    
-    try:
-        # Insert the new filter
-        cursor = conn.cursor()
-        cursor.execute(
-            'INSERT INTO saved_filters (user_id, name, filter_config, created_at) VALUES (?, ?, ?, ?)',
-            (current_user['id'], name, json.dumps(filter_config), time.time())
-        )
-        
-        conn.commit()
-        
-        # Get the new filter ID
-        cursor.execute('SELECT last_insert_rowid()')
-        filter_id = cursor.fetchone()[0]
-        
-        conn.close()
-        
-        return jsonify({
-            'message': 'Filter saved successfully!',
-            'filter': {
-                'id': filter_id,
-                'name': name,
-                'filter_config': filter_config
-            }
-        }), 201
-        
-    except Exception as e:
-        if conn:
-            conn.rollback()
-            conn.close()
-        logger.error(f"Save filter error: {e}")
-        return jsonify({'message': f'Failed to save filter: {str(e)}'}), 500
 
 @app.errorhandler(404)
 def not_found(e):
