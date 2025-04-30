@@ -365,3 +365,42 @@
 2025-04-30 11:53:20,738 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 11:53:20] "GET /posts HTTP/1.1" 200 -
 2025-04-30 11:53:33,938 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 11:53:33] "GET /search?q=ireland&sort=relevance&time_filter=all HTTP/1.1" 200 -
 2025-04-30 11:54:35,923 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 11:54:35] "GET /search?q=ireland&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 12:25:13,922 - __main__ - INFO - Reddit API client initialized successfully
+2025-04-30 12:25:13,935 - __main__ - INFO - Database indexes created successfully
+2025-04-30 12:25:13,936 - auth - INFO - Auth database tables created successfully
+2025-04-30 12:25:13,937 - __main__ - INFO - Databases initialized
+2025-04-30 12:25:13,940 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-30 12:25:13,996 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.20.10.5:5000
+2025-04-30 12:25:13,997 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-30 12:29:36,158 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC LIMIT ? with params [10]
+2025-04-30 12:29:36,164 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:29:36,167 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:29:36] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:29:36,172 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:29:36,173 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:29:36] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:29:41,026 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:29:41,028 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:29:41] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:29:41,043 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:29:41,047 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:29:41] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:31:24,440 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:31:24,441 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:31:24] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:31:24,445 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:31:24,447 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:31:24] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:31:27,827 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:31:27,829 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:31:27] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:31:27,837 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:31:27,839 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:31:27] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:31:29,963 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:31:29,964 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:31:29] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:31:29,968 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 12:31:29,970 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:31:29] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 12:31:59,876 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:31:59] "GET /search?q=galway&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 12:32:37,356 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:32:37] "GET /search?q=ireland&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 12:34:21,660 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:21] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
+2025-04-30 12:34:22,717 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:22] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
+2025-04-30 12:34:24,732 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:24] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
+2025-04-30 12:34:26,931 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:26] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
+2025-04-30 12:34:27,989 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:27] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
+2025-04-30 12:34:30,002 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:30] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
