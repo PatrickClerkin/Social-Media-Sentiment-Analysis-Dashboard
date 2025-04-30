@@ -159,6 +159,36 @@ def analyze_sentiment(text):
         # Return neutral sentiment in case of error
         return {'neg': 0, 'neu': 1, 'pos': 0, 'compound': 0}
 
+# Helper function to insert a comment into the database
+def insert_comment(conn, comment):
+    """Insert a comment into the database."""
+    try:
+        sql = '''
+            INSERT OR REPLACE INTO comments(
+                id, post_id, author, body, score, created_utc,
+                sentiment_neg, sentiment_neu, sentiment_pos, sentiment_compound
+            )
+            VALUES(?,?,?,?,?,?,?,?,?,?)
+        '''
+        cur = conn.cursor()
+        cur.execute(sql, (
+            comment['id'],
+            comment['post_id'],
+            comment['author'],
+            comment['body'],
+            comment['score'],
+            comment['created_utc'],
+            comment['sentiment_neg'],
+            comment['sentiment_neu'],
+            comment['sentiment_pos'],
+            comment['sentiment_compound']
+        ))
+        conn.commit()
+        return True
+    except Exception as e:
+        logger.error(f"Error inserting comment {comment['id']}: {e}")
+        return False
+
 # Routes
 @app.route('/', methods=['GET'])
 def home():
@@ -170,6 +200,7 @@ def home():
             "/search": "Live search Reddit posts",
             "/posts": "Get all posts with filtering options",
             "/posts/<post_id>": "Get a specific post by ID",
+            "/posts/<post_id>/comments": "Get comments for a specific post",
             "/stats": "Get statistical information about the posts",
             "/health": "API health check",
             "/subreddits": "Get list of all subreddits in the database",
@@ -409,6 +440,79 @@ def get_posts():
         post['created_date'] = datetime.fromtimestamp(post['created_utc']).isoformat()
 
     return jsonify(posts_list)
+
+@app.route('/posts/<string:post_id>/comments', methods=['GET'])
+@rate_limit
+@cache_response(timeout=300)
+def get_post_comments(post_id):
+    """Get comments for a specific post."""
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Failed to connect to database"}), 500
+        
+    try:
+        # First check if the post exists
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM posts WHERE id = ?', (post_id,))
+        post = cur.fetchone()
+        
+        if not post:
+            return jsonify({"error": f"Post with ID {post_id} not found"}), 404
+            
+        # Fetch comments
+        cur.execute(
+            'SELECT * FROM comments WHERE post_id = ? ORDER BY score DESC', 
+            (post_id,)
+        )
+        comments = [dict(row) for row in cur.fetchall()]
+        
+        # If no comments in database but reddit API is available, try to fetch them
+        if not comments and reddit is not None:
+            try:
+                # Try to fetch comments from Reddit API
+                submission = reddit.submission(id=post_id)
+                
+                # Replace more comments with their actual content (limited to avoid API rate limiting)
+                submission.comments.replace_more(limit=0)
+                
+                comments = []
+                # Get top-level comments
+                for comment in list(submission.comments)[:10]:  # Limit to top 10
+                    if not hasattr(comment, 'body'):  # Skip non-comment objects
+                        continue
+                        
+                    # Analyze sentiment
+                    sentiment = analyze_sentiment(comment.body)
+                    
+                    # Create comment data
+                    comment_data = {
+                        'id': comment.id,
+                        'post_id': post_id,
+                        'author': str(comment.author),
+                        'body': comment.body,
+                        'score': comment.score,
+                        'created_utc': comment.created_utc,
+                        'sentiment_neg': sentiment['neg'],
+                        'sentiment_neu': sentiment['neu'],
+                        'sentiment_pos': sentiment['pos'],
+                        'sentiment_compound': sentiment['compound']
+                    }
+                    
+                    # Insert into database for future requests
+                    insert_comment(conn, comment_data)
+                    
+                    # Add to results
+                    comments.append(comment_data)
+            except Exception as e:
+                logger.error(f"Error fetching comments from Reddit API: {e}")
+                # Continue with empty comments list
+        
+        conn.close()
+        return jsonify(comments)
+    except Exception as e:
+        conn.close()
+        logger.error(f"Error retrieving comments: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/stats', methods=['GET'])
 @rate_limit
