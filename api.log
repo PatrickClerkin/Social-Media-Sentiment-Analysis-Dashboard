@@ -404,3 +404,69 @@
 2025-04-30 12:34:26,931 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:26] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
 2025-04-30 12:34:27,989 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:27] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
 2025-04-30 12:34:30,002 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 12:34:30] "[33mGET /comments/ql5ma7 HTTP/1.1[0m" 404 -
+2025-04-30 16:24:41,177 - __main__ - INFO - Reddit API client initialized successfully
+2025-04-30 16:24:41,189 - __main__ - INFO - Database indexes created successfully
+2025-04-30 16:24:41,189 - auth - INFO - Auth database tables created successfully
+2025-04-30 16:24:41,194 - __main__ - INFO - Databases initialized
+2025-04-30 16:24:41,195 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-30 16:24:41,212 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.19:5000
+2025-04-30 16:24:41,213 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-30 16:25:41,225 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC LIMIT ? with params [10]
+2025-04-30 16:25:41,232 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 16:25:41,240 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:41] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 16:25:41,246 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 16:25:41,251 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:41] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 16:25:46,097 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 16:25:46,098 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:46] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 16:25:46,104 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY num_comments ASC LIMIT ? with params [10]
+2025-04-30 16:25:46,107 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=num_comments&order=asc
+2025-04-30 16:25:46,109 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:46] "GET /posts?limit=10&sort_by=num_comments&order=asc HTTP/1.1" 200 -
+2025-04-30 16:25:48,224 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=num_comments&order=asc
+2025-04-30 16:25:48,227 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:48] "GET /posts?limit=10&sort_by=num_comments&order=asc HTTP/1.1" 200 -
+2025-04-30 16:25:48,231 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY num_comments DESC LIMIT ? with params [10]
+2025-04-30 16:25:48,236 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=num_comments&order=desc
+2025-04-30 16:25:48,237 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:48] "GET /posts?limit=10&sort_by=num_comments&order=desc HTTP/1.1" 200 -
+2025-04-30 16:25:52,271 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=num_comments&order=desc
+2025-04-30 16:25:52,272 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:52] "GET /posts?limit=10&sort_by=num_comments&order=desc HTTP/1.1" 200 -
+2025-04-30 16:25:52,273 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=num_comments&order=asc
+2025-04-30 16:25:52,277 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:52] "GET /posts?limit=10&sort_by=num_comments&order=asc HTTP/1.1" 200 -
+2025-04-30 16:25:54,926 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=num_comments&order=asc
+2025-04-30 16:25:54,928 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:54] "GET /posts?limit=10&sort_by=num_comments&order=asc HTTP/1.1" 200 -
+2025-04-30 16:25:54,934 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY score ASC LIMIT ? with params [10]
+2025-04-30 16:25:54,936 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=score&order=asc
+2025-04-30 16:25:54,938 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:25:54] "GET /posts?limit=10&sort_by=score&order=asc HTTP/1.1" 200 -
+2025-04-30 16:26:01,949 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY score ASC LIMIT ? with params [10]
+2025-04-30 16:26:01,952 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=score&order=asc&live=true
+2025-04-30 16:26:01,952 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:01] "GET /posts?limit=10&sort_by=score&order=asc&live=true HTTP/1.1" 200 -
+2025-04-30 16:26:09,219 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=score&order=asc&live=true
+2025-04-30 16:26:09,220 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:09] "GET /posts?limit=10&sort_by=score&order=asc&live=true HTTP/1.1" 200 -
+2025-04-30 16:26:19,225 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=score&order=asc&live=true
+2025-04-30 16:26:19,226 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:19] "GET /posts?limit=10&sort_by=score&order=asc&live=true HTTP/1.1" 200 -
+2025-04-30 16:26:19,231 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY title ASC LIMIT ? with params [10]
+2025-04-30 16:26:19,234 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=title&order=asc&live=true
+2025-04-30 16:26:19,234 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:19] "GET /posts?limit=10&sort_by=title&order=asc&live=true HTTP/1.1" 200 -
+2025-04-30 16:26:36,941 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:36] "GET /search?q=w&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:26:37,453 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:37] "GET /search?q=w&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:26:40,099 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:40] "GET /search?q=wo&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:26:42,749 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:42] "GET /search?q=wor&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:26:46,065 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:46] "GET /search?q=worl&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:26:51,642 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:26:51] "GET /search?q=world&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:27:02,179 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=title&order=asc&live=true
+2025-04-30 16:27:02,180 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:02] "GET /posts?limit=10&sort_by=title&order=asc&live=true HTTP/1.1" 200 -
+2025-04-30 16:27:02,188 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=title&order=asc&live=true
+2025-04-30 16:27:02,190 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:02] "GET /posts?limit=10&sort_by=title&order=asc&live=true HTTP/1.1" 200 -
+2025-04-30 16:27:05,528 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY title ASC LIMIT ? with params [10]
+2025-04-30 16:27:05,530 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=title&order=asc
+2025-04-30 16:27:05,530 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:05] "GET /posts?limit=10&sort_by=title&order=asc HTTP/1.1" 200 -
+2025-04-30 16:27:06,468 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=title&order=asc&live=true
+2025-04-30 16:27:06,470 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:06] "GET /posts?limit=10&sort_by=title&order=asc&live=true HTTP/1.1" 200 -
+2025-04-30 16:27:13,455 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:13] "GET /search?q=p&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:27:13,978 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:13] "GET /search?q=p&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:27:15,860 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:15] "GET /search?q=pa&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:27:32,109 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:32] "GET /search?q=pa&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:27:45,941 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:45] "GET /search?q=pad&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:27:48,133 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:48] "GET /search?q=padd&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:27:59,040 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:59] "GET /search?q=paddd&sort=top&time_filter=all HTTP/1.1" 200 -

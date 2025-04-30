@@ -21,7 +21,6 @@ const ShareDashboardModal = lazy(() => import('./ShareDashboardModal'));
 
 // Import styles
 
-
 // Rest of your App.js code follows...
 // Start with your COLORS constant
 const COLORS = {
@@ -1129,6 +1128,566 @@ function App() {
             <h1>Reddit Sentiment Analysis Report</h1>
             <p>Generated on ${new Date().toLocaleString()}</p>
           </div>
+          
+          <h2>Summary</h2>
+          <div class="summary">
+            <div class="stat-card">
+              <h3>Total Posts</h3>
+              <p>${statsData.totalPosts}</p>
+            </div>
+            <div class="stat-card">
+              <h3>Average Score</h3>
+              <p>${statsData.avgScore}</p>
+            </div>
+            <div class="stat-card">
+              <h3>Average Comments</h3>
+              <p>${statsData.avgComments}</p>
+            </div>
+            <div class="stat-card">
+              <h3>Average Sentiment</h3>
+              <p>${statsData.avgSentiment}</p>
+            </div>
+          </div>
+          
+          <div class="visualization">
+            <h2>Sentiment Distribution</h2>
+            <div class="sentiment-distribution">
+              <div style="background-color: #4caf50; width: ${statsData.sentimentBreakdown.positivePercent}%;"></div>
+              <div style="background-color: #ff9800; width: ${statsData.sentimentBreakdown.neutralPercent}%;"></div>
+              <div style="background-color: #f44336; width: ${statsData.sentimentBreakdown.negativePercent}%;"></div>
+            </div>
+            <div class="sentiment-legend">
+              <div class="legend-item">
+                <div class="color-box" style="background-color: #4caf50;"></div>
+                <span>Positive: ${statsData.sentimentBreakdown.positive} (${statsData.sentimentBreakdown.positivePercent}%)</span>
+              </div>
+              <div class="legend-item">
+                <div class="color-box" style="background-color: #ff9800;"></div>
+                <span>Neutral: ${statsData.sentimentBreakdown.neutral} (${statsData.sentimentBreakdown.neutralPercent}%)</span>
+              </div>
+              <div class="legend-item">
+                <div class="color-box" style="background-color: #f44336;"></div>
+                <span>Negative: ${statsData.sentimentBreakdown.negative} (${statsData.sentimentBreakdown.negativePercent}%)</span>
+              </div>
+            </div>
+          </div>
+          
+          ${statsData.topSubreddits.length > 0 ? `
+          <div class="visualization">
+            <h2>Top Subreddits</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Subreddit</th>
+                  <th>Post Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${statsData.topSubreddits.map(sr => `
+                <tr>
+                  <td>r/${sr.name}</td>
+                  <td>${sr.count}</td>
+                </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          ` : ''}
+          
+          <h2>Posts</h2>
+          <p>Displaying ${Math.min(filteredPosts.length, 50)} of ${filteredPosts.length} posts</p>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Score</th>
+                <th>Comments</th>
+                <th>Sentiment</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredPosts.slice(0, 50).map(post => `
+              <tr>
+                <td>${post.title}${post.subreddit ? ` <small>(r/${post.subreddit})</small>` : ''}</td>
+                <td>${post.score}</td>
+                <td>${post.num_comments}</td>
+                <td><span class="sentiment-badge ${getSentimentClass(post.sentiment_compound)}">${post.sentiment_compound.toFixed(2)}</span></td>
+                <td>${formatDate(post.created_utc)}</td>
+              </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <footer>
+            <p>Generated with Reddit Sentiment Dashboard</p>
+            <p>Analysis based on data from ${filters.searchTerm ? `search term "${filters.searchTerm}"` : 'filtered posts'}</p>
+          </footer>
+        </body>
+        </html>
+        `;
+        
+        // Create and trigger download
+        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `${exportFilename}.html`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        break;
+      }
+      
+      default:
+        console.error('Unsupported export format:', format);
+    }
+    
+    setShowExportOptions(false);
+  }, [filteredPosts, filters, searchOptions, statsData, formatDate, getSentimentClass]);
+
+  // New function to handle sharing the dashboard
+  const handleShareDashboard = useCallback(() => {
+    // Create a shareable link with current filters and settings encoded in query params
+    const searchParams = new URLSearchParams();
+    
+    // Add filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) searchParams.append(`filter_${key}`, value);
+    });
+    
+    // Add search options
+    Object.entries(searchOptions).forEach(([key, value]) => {
+      if (value) searchParams.append(`search_${key}`, value);
+    });
+    
+    // Add visualization type
+    searchParams.append('viz', visualizationType);
+    
+    // Generate the full URL
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${searchParams.toString()}`;
+    
+    // Store in state for the share modal
+    setShareUrl(shareUrl);
+    toggleModal('shareModal', true);
+  }, [filters, searchOptions, visualizationType, toggleModal]);
+
+  // Loading state
+  if (loading && !loadingMore) {
+    return (
+      <div className={`app-loading ${darkMode ? 'dark-mode' : ''}`}>
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Loading Reddit data...</p>
+      </div>
+    );
+  }
+  
+  // Error state with retry button
+  if (error && !filteredPosts.length) {
+    return (
+      <div className={`app-error ${darkMode ? 'dark-mode' : ''}`}>
+        <div className="error-container">
+          <h2>Error Loading Data</h2>
+          <p>{error.message}</p>
+          <button className="retry-button" onClick={() => fetchPosts(true)}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Render the application UI
+  return (
+    <div className={`app ${darkMode ? 'dark-mode' : ''}`}>
+      <header className="header">
+        <div className="header-content">
+          <div className="header-left">
+            <h1 className="app-title">Reddit Sentiment Dashboard</h1>
+          </div>
+          <div className="header-right">
+            <div className="header-actions">
+              {currentUser ? (
+                <Suspense fallback={<div className="loading-indicator small"></div>}>
+                  <button 
+                    className="header-button save-button"
+                    onClick={() => toggleModal('saveFilter', true)}
+                    title="Save current filters"
+                  >
+                    <i className="icon-save"></i>
+                    <span>Save Filters</span>
+                  </button>
+                  <button 
+                    className="header-button share-button"
+                    onClick={handleShareDashboard}
+                    title="Share this dashboard"
+                  >
+                    <i className="icon-share"></i>
+                    <span className="button-text-hide-mobile">Share</span>
+                  </button>
+                  <UserMenu />
+                </Suspense>
+              ) : (
+                <button 
+                  className="header-button login-button"
+                  onClick={() => toggleModal('auth', true)}
+                >
+                  <i className="icon-user"></i>
+                  <span>Login / Sign Up</span>
+                </button>
+              )}
+              <button 
+                onClick={toggleDarkMode} 
+                className="header-button theme-toggle"
+                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <i className={`icon-${darkMode ? 'sun' : 'moon'}`}></i>
+                <span className="button-text-hide-mobile">
+                  {darkMode ? 'Light Mode' : 'Dark Mode'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="dashboard-container">
+        <aside className="sidebar">
+          {/* User's saved filters */}
+          {currentUser && (
+            <Suspense fallback={<div className="panel-loading">Loading saved filters...</div>}>
+              <SavedFiltersPanel 
+                onApplyFilter={handleApplySavedSearch}
+                onDeleteFilter={(id) => {
+                  deleteSearch(id);
+                  setSavedSearches(prev => prev.filter(s => s.id !== id));
+                }}
+                savedSearches={savedSearches}
+              />
+            </Suspense>
+          )}
+          
+          {/* Filter panel */}
+          <div className="filter-panel">
+            <div className="panel-header">
+              <h2>Filters</h2>
+              <button 
+                className="panel-toggle-button"
+                onClick={() => setAdvancedSearch(!advancedSearch)}
+                title={advancedSearch ? "Show basic filters" : "Show advanced filters"}
+              >
+                <i className={`icon-${advancedSearch ? 'chevron-up' : 'chevron-down'}`}></i>
+              </button>
+            </div>
+            
+            <form onSubmit={handleFilterSubmit}>
+              <div className="filter-group">
+                <label htmlFor="score-range">Score Range:</label>
+                <div className="range-inputs">
+                  <input
+                    type="text"
+                    id="min-score"
+                    name="minScore"
+                    placeholder="Min"
+                    value={filters.minScore}
+                    onChange={handleFilterChange}
+                    aria-label="Minimum score"
+                  />
+                  <span className="range-separator">to</span>
+                  <input
+                    type="text"
+                    id="max-score"
+                    name="maxScore"
+                    placeholder="Max"
+                    value={filters.maxScore}
+                    onChange={handleFilterChange}
+                    aria-label="Maximum score"
+                  />
+                </div>
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="comments-range">Comments Range:</label>
+                <div className="range-inputs">
+                  <input
+                    type="text"
+                    id="min-comments"
+                    name="minComments"
+                    placeholder="Min"
+                    value={filters.minComments}
+                    onChange={handleFilterChange}
+                    aria-label="Minimum comments"
+                  />
+                  <span className="range-separator">to</span>
+                  <input
+                    type="text"
+                    id="max-comments"
+                    name="maxComments"
+                    placeholder="Max"
+                    value={filters.maxComments}
+                    onChange={handleFilterChange}
+                    aria-label="Maximum comments"
+                  />
+                </div>
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="sentiment-select">Sentiment:</label>
+                <select
+                  id="sentiment-select"
+                  name="sentiment"
+                  value={filters.sentiment}
+                  onChange={handleFilterChange}
+                  aria-label="Sentiment filter"
+                >
+                  <option value="">All</option>
+                  <option value="positive">Positive</option>
+                  <option value="neutral">Neutral</option>
+                  <option value="negative">Negative</option>
+                  {advancedSearch && (
+                    <>
+                      <option value="very-positive">Very Positive</option>
+                      <option value="slightly-positive">Slightly Positive</option>
+                      <option value="slightly-negative">Slightly Negative</option>
+                      <option value="very-negative">Very Negative</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              
+              <div className="filter-group">
+                <label htmlFor="subreddit-input">Subreddit:</label>
+                <input
+                  type="text"
+                  id="subreddit-input"
+                  name="subreddit"
+                  placeholder="e.g. worldnews, politics"
+                  value={filters.subreddit}
+                  onChange={handleFilterChange}
+                  aria-label="Subreddit filter"
+                />
+              </div>
+              
+              <div className="filter-group">
+                <label htmlFor="date-range-select">Date Range:</label>
+                <select
+                  id="date-range-select"
+                  value={dateRangeOption}
+                  onChange={(e) => handleDateRangeChange(e.target.value)}
+                  className="date-range-select"
+                  aria-label="Date range options"
+                >
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="yesterday">Yesterday</option>
+                  <option value="week">Last 7 Days</option>
+                  <option value="month">Last 30 Days</option>
+                  <option value="quarter">Last 90 Days</option>
+                  <option value="year">Last Year</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+              </div>
+              
+              {dateRangeOption === 'custom' && (
+                <div className="filter-group date-inputs">
+                  <div className="date-input-container">
+                    <label htmlFor="start-date">Start Date:</label>
+                    <input
+                      type="date"
+                      id="start-date"
+                      name="startDate"
+                      value={customDateRange.startDate}
+                      onChange={handleCustomDateChange}
+                      aria-label="Start date"
+                    />
+                  </div>
+                  <div className="date-input-container">
+                    <label htmlFor="end-date">End Date:</label>
+                    <input
+                      type="date"
+                      id="end-date"
+                      name="endDate"
+                      value={customDateRange.endDate}
+                      onChange={handleCustomDateChange}
+                      min={customDateRange.startDate} // Can't select a date before the start date
+                      aria-label="End date"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {advancedSearch && (
+                <>
+                  <div className="filter-group">
+                    <label htmlFor="sort-method">Sort By:</label>
+                    <select
+                      id="sort-method"
+                      value={sortConfig.key}
+                      onChange={(e) => setSortConfig({ key: e.target.value, direction: sortConfig.direction })}
+                      aria-label="Sort by field"
+                    >
+                      <option value="created_utc">Date</option>
+                      <option value="score">Score</option>
+                      <option value="num_comments">Comments</option>
+                      <option value="sentiment_compound">Sentiment</option>
+                      <option value="title">Title</option>
+                    </select>
+                    <div className="sort-direction">
+                      <label className="radio-label">
+                        <input
+                          type="radio"
+                          name="sort-direction"
+                          checked={sortConfig.direction === 'asc'}
+                          onChange={() => setSortConfig({ ...sortConfig, direction: 'asc' })}
+                          aria-label="Sort ascending"
+                        />
+                        <span>Ascending</span>
+                      </label>
+                      <label className="radio-label">
+                        <input
+                          type="radio"
+                          name="sort-direction"
+                          checked={sortConfig.direction === 'desc'}
+                          onChange={() => setSortConfig({ ...sortConfig, direction: 'desc' })}
+                          aria-label="Sort descending"
+                        />
+                        <span>Descending</span>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div className="filter-group">
+                    <label>Search Options:</label>
+                    <div className="checkbox-group">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          name="includeComments"
+                          checked={searchOptions.includeComments}
+                          onChange={handleSearchOptionsChange}
+                          aria-label="Include comments in search"
+                        />
+                        <span>Include Comments</span>
+                      </label>
+                      
+                      {searchOptions.searchMethod === 'live' && (
+                        <label className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            name="autoRefresh"
+                            checked={searchOptions.autoRefresh}
+                            onChange={handleSearchOptionsChange}
+                            aria-label="Auto-refresh live search"
+                          />
+                          <span>Auto-Refresh</span>
+                        </label>
+                      )}
+                    </div>
+                    
+                    {searchOptions.autoRefresh && (
+                      <div className="slider-group">
+                        <label htmlFor="refresh-interval">
+                          Refresh Interval: {searchOptions.refreshInterval}s
+                        </label>
+                        <input
+                          type="range"
+                          id="refresh-interval"
+                          name="refreshInterval"
+                          min="15"
+                          max="300"
+                          step="15"
+                          value={searchOptions.refreshInterval}
+                          onChange={handleSearchOptionsChange}
+                          aria-label="Refresh interval in seconds"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              <button type="submit" className="apply-filters-button">
+                <i className="icon-filter"></i>
+                <span>Apply Filters</span>
+              </button>
+            </form>
+          </div>
+
+          {/* Statistics panel */}
+          <div className="stats-panel">
+            <h2 className="panel-header">Statistics</h2>
+            <div className="stat-item">
+              <span className="stat-label">Total Posts:</span>
+              <span className="stat-value">{statsData.totalPosts}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Average Score:</span>
+              <span className="stat-value">{statsData.avgScore}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Average Comments:</span>
+              <span className="stat-value">{statsData.avgComments}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Average Sentiment:</span>
+              <span className="stat-value">{statsData.avgSentiment}</span>
+            </div>
+            
+            <div className="sentiment-mini-chart">
+              <div className="sentiment-bar positive" style={{ width: `${statsData.sentimentBreakdown.positivePercent}%` }}></div>
+              <div className="sentiment-bar neutral" style={{ width: `${statsData.sentimentBreakdown.neutralPercent}%` }}></div>
+              <div className="sentiment-bar negative" style={{ width: `${statsData.sentimentBreakdown.negativePercent}%` }}></div>
+            </div>
+            
+            <div className="sentiment-mini-legend">
+              <div className="legend-item">
+                <span className="color-dot positive"></span>
+                <span>{statsData.sentimentBreakdown.positivePercent}%</span>
+              </div>
+              <div className="legend-item">
+                <span className="color-dot neutral"></span>
+                <span>{statsData.sentimentBreakdown.neutralPercent}%</span>
+              </div>
+              <div className="legend-item">
+                <span className="color-dot negative"></span>
+                <span>{statsData.sentimentBreakdown.negativePercent}%</span>
+              </div>
+            </div>
+            
+            <div className="stat-item">
+              <span className="stat-label">Data Source:</span>
+              <span className="stat-value">
+                {isLiveSearch ? 'Live Reddit API' : 'Local Database'}
+              </span>
+            </div>
+            
+            {lastUpdate && (
+              <div className="stat-item">
+                <span className="stat-label">Last Updated:</span>
+                <span className="stat-value">
+                  {new Date(lastUpdate).toLocaleTimeString()}
+                </span>
+              </div>
+            )}
+            
+            {statsData.topSubreddits && statsData.topSubreddits.length > 0 && (
+              <div className="top-subreddits">
+                <h3>Top Subreddits</h3>
+                <ul className="subreddit-list">
+                  {statsData.topSubreddits.map(sr => (
+                    <li key={sr.name} className="subreddit-item">
+                      <span className="subreddit-name">r/{sr.name}</span>
+                      <span className="subreddit-count">{sr.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </aside>
 
         <main className="main-content">
@@ -1966,563 +2525,3 @@ function App() {
 }
 
 export default App;
-          
-          <h2>Summary</h2>
-          <div class="summary">
-            <div class="stat-card">
-              <h3>Total Posts</h3>
-              <p>${statsData.totalPosts}</p>
-            </div>
-            <div class="stat-card">
-              <h3>Average Score</h3>
-              <p>${statsData.avgScore}</p>
-            </div>
-            <div class="stat-card">
-              <h3>Average Comments</h3>
-              <p>${statsData.avgComments}</p>
-            </div>
-            <div class="stat-card">
-              <h3>Average Sentiment</h3>
-              <p>${statsData.avgSentiment}</p>
-            </div>
-          </div>
-          
-          <div class="visualization">
-            <h2>Sentiment Distribution</h2>
-            <div class="sentiment-distribution">
-              <div style="background-color: #4caf50; width: ${statsData.sentimentBreakdown.positivePercent}%;"></div>
-              <div style="background-color: #ff9800; width: ${statsData.sentimentBreakdown.neutralPercent}%;"></div>
-              <div style="background-color: #f44336; width: ${statsData.sentimentBreakdown.negativePercent}%;"></div>
-            </div>
-            <div class="sentiment-legend">
-              <div class="legend-item">
-                <div class="color-box" style="background-color: #4caf50;"></div>
-                <span>Positive: ${statsData.sentimentBreakdown.positive} (${statsData.sentimentBreakdown.positivePercent}%)</span>
-              </div>
-              <div class="legend-item">
-                <div class="color-box" style="background-color: #ff9800;"></div>
-                <span>Neutral: ${statsData.sentimentBreakdown.neutral} (${statsData.sentimentBreakdown.neutralPercent}%)</span>
-              </div>
-              <div class="legend-item">
-                <div class="color-box" style="background-color: #f44336;"></div>
-                <span>Negative: ${statsData.sentimentBreakdown.negative} (${statsData.sentimentBreakdown.negativePercent}%)</span>
-              </div>
-            </div>
-          </div>
-          
-          ${statsData.topSubreddits.length > 0 ? `
-          <div class="visualization">
-            <h2>Top Subreddits</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Subreddit</th>
-                  <th>Post Count</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${statsData.topSubreddits.map(sr => `
-                <tr>
-                  <td>r/${sr.name}</td>
-                  <td>${sr.count}</td>
-                </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-          ` : ''}
-          
-          <h2>Posts</h2>
-          <p>Displaying ${Math.min(filteredPosts.length, 50)} of ${filteredPosts.length} posts</p>
-          
-          <table>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Score</th>
-                <th>Comments</th>
-                <th>Sentiment</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredPosts.slice(0, 50).map(post => `
-              <tr>
-                <td>${post.title}${post.subreddit ? ` <small>(r/${post.subreddit})</small>` : ''}</td>
-                <td>${post.score}</td>
-                <td>${post.num_comments}</td>
-                <td><span class="sentiment-badge ${getSentimentClass(post.sentiment_compound)}">${post.sentiment_compound.toFixed(2)}</span></td>
-                <td>${formatDate(post.created_utc)}</td>
-              </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          
-          <footer>
-            <p>Generated with Reddit Sentiment Dashboard</p>
-            <p>Analysis based on data from ${filters.searchTerm ? `search term "${filters.searchTerm}"` : 'filtered posts'}</p>
-          </footer>
-        </body>
-        </html>
-        `;
-        
-        // Create and trigger download
-        const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        
-        link.setAttribute('href', url);
-        link.setAttribute('download', `${exportFilename}.html`);
-        link.style.visibility = 'hidden';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        break;
-      }
-      
-      default:
-        console.error('Unsupported export format:', format);
-    }
-    
-    setShowExportOptions(false);
-  }, [filteredPosts, filters, searchOptions, statsData, formatDate, getSentimentClass]);
-
-  // New function to handle sharing the dashboard
-  const handleShareDashboard = useCallback(() => {
-    // Create a shareable link with current filters and settings encoded in query params
-    const searchParams = new URLSearchParams();
-    
-    // Add filters
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) searchParams.append(`filter_${key}`, value);
-    });
-    
-    // Add search options
-    Object.entries(searchOptions).forEach(([key, value]) => {
-      if (value) searchParams.append(`search_${key}`, value);
-    });
-    
-    // Add visualization type
-    searchParams.append('viz', visualizationType);
-    
-    // Generate the full URL
-    const shareUrl = `${window.location.origin}${window.location.pathname}?${searchParams.toString()}`;
-    
-    // Store in state for the share modal
-    setShareUrl(shareUrl);
-    toggleModal('shareModal', true);
-  }, [filters, searchOptions, visualizationType, toggleModal]);
-
-  // Loading state
-  if (loading && !loadingMore) {
-    return (
-      <div className={`app-loading ${darkMode ? 'dark-mode' : ''}`}>
-        <div className="loading-spinner"></div>
-        <p className="loading-text">Loading Reddit data...</p>
-      </div>
-    );
-  }
-  
-  // Error state with retry button
-  if (error && !filteredPosts.length) {
-    return (
-      <div className={`app-error ${darkMode ? 'dark-mode' : ''}`}>
-        <div className="error-container">
-          <h2>Error Loading Data</h2>
-          <p>{error.message}</p>
-          <button className="retry-button" onClick={() => fetchPosts(true)}>
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Render the application UI
-  return (
-    <div className={`app ${darkMode ? 'dark-mode' : ''}`}>
-      <header className="header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1 className="app-title">Reddit Sentiment Dashboard</h1>
-          </div>
-          <div className="header-right">
-            <div className="header-actions">
-              {currentUser ? (
-                <Suspense fallback={<div className="loading-indicator small"></div>}>
-                  <button 
-                    className="header-button save-button"
-                    onClick={() => toggleModal('saveFilter', true)}
-                    title="Save current filters"
-                  >
-                    <i className="icon-save"></i>
-                    <span>Save Filters</span>
-                  </button>
-                  <button 
-                    className="header-button share-button"
-                    onClick={handleShareDashboard}
-                    title="Share this dashboard"
-                  >
-                    <i className="icon-share"></i>
-                    <span className="button-text-hide-mobile">Share</span>
-                  </button>
-                  <UserMenu />
-                </Suspense>
-              ) : (
-                <button 
-                  className="header-button login-button"
-                  onClick={() => toggleModal('auth', true)}
-                >
-                  <i className="icon-user"></i>
-                  <span>Login / Sign Up</span>
-                </button>
-              )}
-              <button 
-                onClick={toggleDarkMode} 
-                className="header-button theme-toggle"
-                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                <i className={`icon-${darkMode ? 'sun' : 'moon'}`}></i>
-                <span className="button-text-hide-mobile">
-                  {darkMode ? 'Light Mode' : 'Dark Mode'}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="dashboard-container">
-        <aside className="sidebar">
-          {/* User's saved filters */}
-          {currentUser && (
-            <Suspense fallback={<div className="panel-loading">Loading saved filters...</div>}>
-              <SavedFiltersPanel 
-                onApplyFilter={handleApplySavedSearch}
-                onDeleteFilter={(id) => {
-                  deleteSearch(id);
-                  setSavedSearches(prev => prev.filter(s => s.id !== id));
-                }}
-                savedSearches={savedSearches}
-              />
-            </Suspense>
-          )}
-          
-          {/* Filter panel */}
-          <div className="filter-panel">
-            <div className="panel-header">
-              <h2>Filters</h2>
-              <button 
-                className="panel-toggle-button"
-                onClick={() => setAdvancedSearch(!advancedSearch)}
-                title={advancedSearch ? "Show basic filters" : "Show advanced filters"}
-              >
-                <i className={`icon-${advancedSearch ? 'chevron-up' : 'chevron-down'}`}></i>
-              </button>
-            </div>
-            
-            <form onSubmit={handleFilterSubmit}>
-              <div className="filter-group">
-                <label htmlFor="score-range">Score Range:</label>
-                <div className="range-inputs">
-                  <input
-                    type="text"
-                    id="min-score"
-                    name="minScore"
-                    placeholder="Min"
-                    value={filters.minScore}
-                    onChange={handleFilterChange}
-                    aria-label="Minimum score"
-                  />
-                  <span className="range-separator">to</span>
-                  <input
-                    type="text"
-                    id="max-score"
-                    name="maxScore"
-                    placeholder="Max"
-                    value={filters.maxScore}
-                    onChange={handleFilterChange}
-                    aria-label="Maximum score"
-                  />
-                </div>
-              </div>
-
-              <div className="filter-group">
-                <label htmlFor="comments-range">Comments Range:</label>
-                <div className="range-inputs">
-                  <input
-                    type="text"
-                    id="min-comments"
-                    name="minComments"
-                    placeholder="Min"
-                    value={filters.minComments}
-                    onChange={handleFilterChange}
-                    aria-label="Minimum comments"
-                  />
-                  <span className="range-separator">to</span>
-                  <input
-                    type="text"
-                    id="max-comments"
-                    name="maxComments"
-                    placeholder="Max"
-                    value={filters.maxComments}
-                    onChange={handleFilterChange}
-                    aria-label="Maximum comments"
-                  />
-                </div>
-              </div>
-
-              <div className="filter-group">
-                <label htmlFor="sentiment-select">Sentiment:</label>
-                <select
-                  id="sentiment-select"
-                  name="sentiment"
-                  value={filters.sentiment}
-                  onChange={handleFilterChange}
-                  aria-label="Sentiment filter"
-                >
-                  <option value="">All</option>
-                  <option value="positive">Positive</option>
-                  <option value="neutral">Neutral</option>
-                  <option value="negative">Negative</option>
-                  {advancedSearch && (
-                    <>
-                      <option value="very-positive">Very Positive</option>
-                      <option value="slightly-positive">Slightly Positive</option>
-                      <option value="slightly-negative">Slightly Negative</option>
-                      <option value="very-negative">Very Negative</option>
-                    </>
-                  )}
-                </select>
-              </div>
-              
-              <div className="filter-group">
-                <label htmlFor="subreddit-input">Subreddit:</label>
-                <input
-                  type="text"
-                  id="subreddit-input"
-                  name="subreddit"
-                  placeholder="e.g. worldnews, politics"
-                  value={filters.subreddit}
-                  onChange={handleFilterChange}
-                  aria-label="Subreddit filter"
-                />
-              </div>
-              
-              <div className="filter-group">
-                <label htmlFor="date-range-select">Date Range:</label>
-                <select
-                  id="date-range-select"
-                  value={dateRangeOption}
-                  onChange={(e) => handleDateRangeChange(e.target.value)}
-                  className="date-range-select"
-                  aria-label="Date range options"
-                >
-                  <option value="all">All Time</option>
-                  <option value="today">Today</option>
-                  <option value="yesterday">Yesterday</option>
-                  <option value="week">Last 7 Days</option>
-                  <option value="month">Last 30 Days</option>
-                  <option value="quarter">Last 90 Days</option>
-                  <option value="year">Last Year</option>
-                  <option value="custom">Custom Range</option>
-                </select>
-              </div>
-              
-              {dateRangeOption === 'custom' && (
-                <div className="filter-group date-inputs">
-                  <div className="date-input-container">
-                    <label htmlFor="start-date">Start Date:</label>
-                    <input
-                      type="date"
-                      id="start-date"
-                      name="startDate"
-                      value={customDateRange.startDate}
-                      onChange={handleCustomDateChange}
-                      aria-label="Start date"
-                    />
-                  </div>
-                  <div className="date-input-container">
-                    <label htmlFor="end-date">End Date:</label>
-                    <input
-                      type="date"
-                      id="end-date"
-                      name="endDate"
-                      value={customDateRange.endDate}
-                      onChange={handleCustomDateChange}
-                      min={customDateRange.startDate} // Can't select a date before the start date
-                      aria-label="End date"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {advancedSearch && (
-                <>
-                  <div className="filter-group">
-                    <label htmlFor="sort-method">Sort By:</label>
-                    <select
-                      id="sort-method"
-                      value={sortConfig.key}
-                      onChange={(e) => setSortConfig({ key: e.target.value, direction: sortConfig.direction })}
-                      aria-label="Sort by field"
-                    >
-                      <option value="created_utc">Date</option>
-                      <option value="score">Score</option>
-                      <option value="num_comments">Comments</option>
-                      <option value="sentiment_compound">Sentiment</option>
-                      <option value="title">Title</option>
-                    </select>
-                    <div className="sort-direction">
-                      <label className="radio-label">
-                        <input
-                          type="radio"
-                          name="sort-direction"
-                          checked={sortConfig.direction === 'asc'}
-                          onChange={() => setSortConfig({ ...sortConfig, direction: 'asc' })}
-                          aria-label="Sort ascending"
-                        />
-                        <span>Ascending</span>
-                      </label>
-                      <label className="radio-label">
-                        <input
-                          type="radio"
-                          name="sort-direction"
-                          checked={sortConfig.direction === 'desc'}
-                          onChange={() => setSortConfig({ ...sortConfig, direction: 'desc' })}
-                          aria-label="Sort descending"
-                        />
-                        <span>Descending</span>
-                      </label>
-                    </div>
-                  </div>
-                  
-                  <div className="filter-group">
-                    <label>Search Options:</label>
-                    <div className="checkbox-group">
-                      <label className="checkbox-label">
-                        <input
-                          type="checkbox"
-                          name="includeComments"
-                          checked={searchOptions.includeComments}
-                          onChange={handleSearchOptionsChange}
-                          aria-label="Include comments in search"
-                        />
-                        <span>Include Comments</span>
-                      </label>
-                      
-                      {searchOptions.searchMethod === 'live' && (
-                        <label className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            name="autoRefresh"
-                            checked={searchOptions.autoRefresh}
-                            onChange={handleSearchOptionsChange}
-                            aria-label="Auto-refresh live search"
-                          />
-                          <span>Auto-Refresh</span>
-                        </label>
-                      )}
-                    </div>
-                    
-                    {searchOptions.autoRefresh && (
-                      <div className="slider-group">
-                        <label htmlFor="refresh-interval">
-                          Refresh Interval: {searchOptions.refreshInterval}s
-                        </label>
-                        <input
-                          type="range"
-                          id="refresh-interval"
-                          name="refreshInterval"
-                          min="15"
-                          max="300"
-                          step="15"
-                          value={searchOptions.refreshInterval}
-                          onChange={handleSearchOptionsChange}
-                          aria-label="Refresh interval in seconds"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              <button type="submit" className="apply-filters-button">
-                <i className="icon-filter"></i>
-                <span>Apply Filters</span>
-              </button>
-            </form>
-          </div>
-
-          {/* Statistics panel */}
-          <div className="stats-panel">
-            <h2 className="panel-header">Statistics</h2>
-            <div className="stat-item">
-              <span className="stat-label">Total Posts:</span>
-              <span className="stat-value">{statsData.totalPosts}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Average Score:</span>
-              <span className="stat-value">{statsData.avgScore}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Average Comments:</span>
-              <span className="stat-value">{statsData.avgComments}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Average Sentiment:</span>
-              <span className="stat-value">{statsData.avgSentiment}</span>
-            </div>
-            
-            <div className="sentiment-mini-chart">
-              <div className="sentiment-bar positive" style={{ width: `${statsData.sentimentBreakdown.positivePercent}%` }}></div>
-              <div className="sentiment-bar neutral" style={{ width: `${statsData.sentimentBreakdown.neutralPercent}%` }}></div>
-              <div className="sentiment-bar negative" style={{ width: `${statsData.sentimentBreakdown.negativePercent}%` }}></div>
-            </div>
-            
-            <div className="sentiment-mini-legend">
-              <div className="legend-item">
-                <span className="color-dot positive"></span>
-                <span>{statsData.sentimentBreakdown.positivePercent}%</span>
-              </div>
-              <div className="legend-item">
-                <span className="color-dot neutral"></span>
-                <span>{statsData.sentimentBreakdown.neutralPercent}%</span>
-              </div>
-              <div className="legend-item">
-                <span className="color-dot negative"></span>
-                <span>{statsData.sentimentBreakdown.negativePercent}%</span>
-              </div>
-            </div>
-            
-            <div className="stat-item">
-              <span className="stat-label">Data Source:</span>
-              <span className="stat-value">
-                {isLiveSearch ? 'Live Reddit API' : 'Local Database'}
-              </span>
-            </div>
-            
-            {lastUpdate && (
-              <div className="stat-item">
-                <span className="stat-label">Last Updated:</span>
-                <span className="stat-value">
-                  {new Date(lastUpdate).toLocaleTimeString()}
-                </span>
-              </div>
-            )}
-            
-            {statsData.topSubreddits && statsData.topSubreddits.length > 0 && (
-              <div className="top-subreddits">
-                <h3>Top Subreddits</h3>
-                <ul className="subreddit-list">
-                  {statsData.topSubreddits.map(sr => (
-                    <li key={sr.name} className="subreddit-item">
-                      <span className="subreddit-name">r/{sr.name}</span>
-                      <span className="subreddit-count">{sr.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
