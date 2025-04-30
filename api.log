@@ -470,3 +470,24 @@
 2025-04-30 16:27:45,941 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:45] "GET /search?q=pad&sort=top&time_filter=all HTTP/1.1" 200 -
 2025-04-30 16:27:48,133 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:48] "GET /search?q=padd&sort=top&time_filter=all HTTP/1.1" 200 -
 2025-04-30 16:27:59,040 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 16:27:59] "GET /search?q=paddd&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 16:59:37,606 - __main__ - INFO - Reddit API client initialized successfully
+2025-04-30 16:59:37,631 - __main__ - INFO - Database indexes created successfully
+2025-04-30 16:59:37,635 - auth - INFO - Auth database tables created successfully
+2025-04-30 16:59:37,635 - __main__ - INFO - Databases initialized
+2025-04-30 16:59:37,642 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-30 16:59:37,695 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.19:5000
+2025-04-30 16:59:37,699 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-30 17:00:33,358 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC LIMIT ? with params [10]
+2025-04-30 17:00:33,377 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 17:00:33,379 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 17:00:33] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 17:00:33,383 - __main__ - INFO - Cache hit for /posts?limit=10&sort_by=created_utc&order=desc
+2025-04-30 17:00:33,389 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 17:00:33] "GET /posts?limit=10&sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 17:00:36,462 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC LIMIT ? with params [10]
+2025-04-30 17:00:36,466 - __main__ - INFO - Cached response for /posts?limit=10&sort_by=created_utc&order=desc&live=true
+2025-04-30 17:00:36,469 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 17:00:36] "GET /posts?limit=10&sort_by=created_utc&order=desc&live=true HTTP/1.1" 200 -
+2025-04-30 17:00:42,355 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 17:00:42] "GET /search?q=d&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 17:00:43,380 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 17:00:43] "GET /search?q=d&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 17:00:45,936 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 17:00:45] "GET /search?q=da&sort=relevance&time_filter=all HTTP/1.1" 200 -

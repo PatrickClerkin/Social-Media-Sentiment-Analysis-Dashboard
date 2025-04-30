@@ -551,11 +551,9 @@ function App() {
     const value = e.target.value;
     setFilters(prev => ({ ...prev, searchTerm: value }));
     
-    // If auto-search is enabled, use throttled search
-    if (searchOptions.autoSearch) {
-      throttledSearch(value);
-    }
-  }, [throttledSearch, searchOptions.autoSearch]);
+    // Removed the auto-search logic to prevent searches as user types
+    // Now search will only happen when the form is submitted
+  }, []);
   
   // Enhanced search options change handler
   const handleSearchOptionsChange = useCallback((e) => {
