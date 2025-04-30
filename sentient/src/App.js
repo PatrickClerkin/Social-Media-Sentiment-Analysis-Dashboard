@@ -274,7 +274,8 @@ function App() {
   }, []);
 
   // Fetch posts with enhanced error handling and loading states
-  const fetchPosts = useCallback(async (resetPage = true) => {
+  // MODIFIED: Now accepts a filtersToUse parameter instead of relying on filters state directly
+  const fetchPosts = useCallback(async (resetPage = true, filtersToUse = null) => {
     if (resetPage) {
       setLoading(true);
       setCurrentPage(1);
@@ -290,11 +291,14 @@ function App() {
       let url = `${BASE_URL}/posts`;
       const params = new URLSearchParams();
       
+      // Use provided filters or fall back to current filters state
+      const currentFilters = filtersToUse || filters;
+      
       // If search term is set, determine if we should use live search
-      if (filters.searchTerm && searchOptions.searchMethod === 'live') {
+      if (currentFilters.searchTerm && searchOptions.searchMethod === 'live') {
         // For live search use the dedicated /search endpoint
         url = `${BASE_URL}/search`;
-        params.append('q', filters.searchTerm);
+        params.append('q', currentFilters.searchTerm);
         params.append('sort', searchOptions.sortMethod);
         params.append('time_filter', searchOptions.timeFilter);
         
@@ -304,21 +308,21 @@ function App() {
         
         setIsLiveSearch(true);
         
-        if (filters.subreddit) {
-          params.append('subreddit', filters.subreddit);
+        if (currentFilters.subreddit) {
+          params.append('subreddit', currentFilters.subreddit);
         }
       } else {
         // Regular database search with all filters
-        if (filters.minScore) params.append('min_score', filters.minScore);
-        if (filters.maxScore) params.append('max_score', filters.maxScore);
-        if (filters.minComments) params.append('min_comments', filters.minComments);
-        if (filters.maxComments) params.append('max_comments', filters.maxComments);
-        if (filters.sentiment) params.append('sentiment', filters.sentiment);
-        if (filters.subreddit) params.append('subreddit', filters.subreddit);
-        if (filters.searchTerm) params.append('search', filters.searchTerm);
+        if (currentFilters.minScore) params.append('min_score', currentFilters.minScore);
+        if (currentFilters.maxScore) params.append('max_score', currentFilters.maxScore);
+        if (currentFilters.minComments) params.append('min_comments', currentFilters.minComments);
+        if (currentFilters.maxComments) params.append('max_comments', currentFilters.maxComments);
+        if (currentFilters.sentiment) params.append('sentiment', currentFilters.sentiment);
+        if (currentFilters.subreddit) params.append('subreddit', currentFilters.subreddit);
+        if (currentFilters.searchTerm) params.append('search', currentFilters.searchTerm);
 
-        const startTs = dateToTimestamp(filters.startDate);
-        const endTs = dateToTimestamp(filters.endDate);
+        const startTs = dateToTimestamp(currentFilters.startDate);
+        const endTs = dateToTimestamp(currentFilters.endDate);
         if (startTs) params.append('start_date', startTs);
         if (endTs) params.append('end_date', endTs + 86400); // Include the full day
         
@@ -372,7 +376,7 @@ function App() {
     }
   }, [
     BASE_URL, 
-    filters, 
+    // filters,  // REMOVED: no longer a dependency
     searchOptions, 
     currentPage, 
     postsPerPage, 
@@ -427,7 +431,7 @@ function App() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && isLiveSearch && searchOptions.autoRefresh) {
-        fetchPosts(true);
+        fetchPosts(true, filters); // MODIFIED: Pass current filters explicitly
       }
     };
     
@@ -436,7 +440,7 @@ function App() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isLiveSearch, searchOptions.autoRefresh, fetchPosts]);
+  }, [isLiveSearch, searchOptions.autoRefresh, fetchPosts, filters]);
 
   // Cleanup auto-refresh timer when component unmounts
   useEffect(() => {
@@ -483,8 +487,8 @@ function App() {
       });
     }
     
-    // Initial data fetch
-    fetchPosts();
+    // Initial data fetch - MODIFIED: pass current filters explicitly 
+    fetchPosts(true, filters);
     
     // Apply system dark mode changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -497,13 +501,13 @@ function App() {
     
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [currentUser, fetchPosts, getSavedSearches]);
+  }, [currentUser, fetchPosts, getSavedSearches, filters]);
 
   // Debounced and throttled filter application for performance
   const debouncedApplyFilters = useCallback(
     debounce((newFilters) => {
       setFilters(newFilters);
-      fetchPosts(true);
+      fetchPosts(true, newFilters); // MODIFIED: Pass newFilters explicitly
     }, 500),
     [fetchPosts]
   );
@@ -511,10 +515,11 @@ function App() {
   // Throttled search for performance
   const throttledSearch = useCallback(
     throttle((term) => {
-      setFilters(prev => ({ ...prev, searchTerm: term }));
-      fetchPosts(true);
+      const newFilters = { ...filters, searchTerm: term };
+      setFilters(newFilters);
+      fetchPosts(true, newFilters); // MODIFIED: Pass newFilters explicitly
     }, 1000),
-    [fetchPosts]
+    [fetchPosts, filters]
   );
 
   // Enhanced function to handle all modal states
@@ -528,8 +533,8 @@ function App() {
   // Enhanced filter form submission
   const handleFilterSubmit = useCallback((e) => {
     e.preventDefault();
-    fetchPosts(true);
-  }, [fetchPosts]);
+    fetchPosts(true, filters); // MODIFIED: Pass current filters explicitly
+  }, [fetchPosts, filters]);
 
   // Enhanced filter input change with validation
   const handleFilterChange = useCallback((e) => {
@@ -658,7 +663,7 @@ function App() {
     
     // If using server-side sorting, refetch data
     if (!isLiveSearch) {
-      fetchPosts(true);
+      fetchPosts(true, filters); // MODIFIED: Pass current filters explicitly
     } else {
       // For live search or when we don't want to hit the server again, do client-side sorting
       setFilteredPosts(prevPosts => {
@@ -681,7 +686,7 @@ function App() {
         return sortedPosts;
       });
     }
-  }, [isLiveSearch, fetchPosts, sortConfig]);
+  }, [isLiveSearch, fetchPosts, sortConfig, filters]);
 
   // Enhanced infinite scroll detection
   const handleScroll = useCallback(() => {
@@ -691,9 +696,9 @@ function App() {
     const scrollThreshold = document.documentElement.offsetHeight - 200;
     
     if (scrollPosition >= scrollThreshold) {
-      fetchPosts(false);
+      fetchPosts(false, filters); // MODIFIED: Pass current filters explicitly
     }
-  }, [loading, loadingMore, hasMore, fetchPosts]);
+  }, [loading, loadingMore, hasMore, fetchPosts, filters]);
 
   // Add scroll event listener for infinite scroll
   useEffect(() => {
@@ -730,10 +735,11 @@ function App() {
   // Apply saved search
   const handleApplySavedSearch = useCallback((search) => {
     if (search && search.filter_config) {
-      setFilters(search.filter_config.filters || {});
+      const newFilters = search.filter_config.filters || {};
+      setFilters(newFilters);
       setSearchOptions(search.filter_config.searchOptions || searchOptions);
       setSortConfig(search.filter_config.sortConfig || sortConfig);
-      fetchPosts(true);
+      fetchPosts(true, newFilters); // MODIFIED: Pass newFilters explicitly
     }
   }, [fetchPosts, searchOptions, sortConfig]);
 
@@ -1291,7 +1297,7 @@ function App() {
         <div className="error-container">
           <h2>Error Loading Data</h2>
           <p>{error.message}</p>
-          <button className="retry-button" onClick={() => fetchPosts(true)}>
+          <button className="retry-button" onClick={() => fetchPosts(true, filters)}>
             Retry
           </button>
         </div>
@@ -1574,952 +1580,952 @@ function App() {
                       
                       {searchOptions.searchMethod === 'live' && (
                         <label className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            name="autoRefresh"
-                            checked={searchOptions.autoRefresh}
-                            onChange={handleSearchOptionsChange}
-                            aria-label="Auto-refresh live search"
-                          />
-                          <span>Auto-Refresh</span>
-                        </label>
-                      )}
-                    </div>
-                    
-                    {searchOptions.autoRefresh && (
-                      <div className="slider-group">
-                        <label htmlFor="refresh-interval">
-                          Refresh Interval: {searchOptions.refreshInterval}s
-                        </label>
                         <input
-                          type="range"
-                          id="refresh-interval"
-                          name="refreshInterval"
-                          min="15"
-                          max="300"
-                          step="15"
-                          value={searchOptions.refreshInterval}
+                          type="checkbox"
+                          name="autoRefresh"
+                          checked={searchOptions.autoRefresh}
                           onChange={handleSearchOptionsChange}
-                          aria-label="Refresh interval in seconds"
+                          aria-label="Auto-refresh live search"
                         />
-                      </div>
+                        <span>Auto-Refresh</span>
+                      </label>
                     )}
                   </div>
-                </>
-              )}
-
-              <button type="submit" className="apply-filters-button">
-                <i className="icon-filter"></i>
-                <span>Apply Filters</span>
-              </button>
-            </form>
-          </div>
-
-          {/* Statistics panel */}
-          <div className="stats-panel">
-            <h2 className="panel-header">Statistics</h2>
-            <div className="stat-item">
-              <span className="stat-label">Total Posts:</span>
-              <span className="stat-value">{statsData.totalPosts}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Average Score:</span>
-              <span className="stat-value">{statsData.avgScore}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Average Comments:</span>
-              <span className="stat-value">{statsData.avgComments}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Average Sentiment:</span>
-              <span className="stat-value">{statsData.avgSentiment}</span>
-            </div>
-            
-            <div className="sentiment-mini-chart">
-              <div className="sentiment-bar positive" style={{ width: `${statsData.sentimentBreakdown.positivePercent}%` }}></div>
-              <div className="sentiment-bar neutral" style={{ width: `${statsData.sentimentBreakdown.neutralPercent}%` }}></div>
-              <div className="sentiment-bar negative" style={{ width: `${statsData.sentimentBreakdown.negativePercent}%` }}></div>
-            </div>
-            
-            <div className="sentiment-mini-legend">
-              <div className="legend-item">
-                <span className="color-dot positive"></span>
-                <span>{statsData.sentimentBreakdown.positivePercent}%</span>
-              </div>
-              <div className="legend-item">
-                <span className="color-dot neutral"></span>
-                <span>{statsData.sentimentBreakdown.neutralPercent}%</span>
-              </div>
-              <div className="legend-item">
-                <span className="color-dot negative"></span>
-                <span>{statsData.sentimentBreakdown.negativePercent}%</span>
-              </div>
-            </div>
-            
-            <div className="stat-item">
-              <span className="stat-label">Data Source:</span>
-              <span className="stat-value">
-                {isLiveSearch ? 'Live Reddit API' : 'Local Database'}
-              </span>
-            </div>
-            
-            {lastUpdate && (
-              <div className="stat-item">
-                <span className="stat-label">Last Updated:</span>
-                <span className="stat-value">
-                  {new Date(lastUpdate).toLocaleTimeString()}
-                </span>
-              </div>
-            )}
-            
-            {statsData.topSubreddits && statsData.topSubreddits.length > 0 && (
-              <div className="top-subreddits">
-                <h3>Top Subreddits</h3>
-                <ul className="subreddit-list">
-                  {statsData.topSubreddits.map(sr => (
-                    <li key={sr.name} className="subreddit-item">
-                      <span className="subreddit-name">r/{sr.name}</span>
-                      <span className="subreddit-count">{sr.count}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </aside>
-
-        <main className="main-content">
-          {/* Search toolbar */}
-          <div className="search-toolbar">
-            <div className="search-container">
-              <form onSubmit={handleFilterSubmit} className="search-form">
-                <div className="search-input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="Search posts..."
-                    value={filters.searchTerm}
-                    onChange={handleSearchChange}
-                    className="search-input"
-                    aria-label="Search posts"
-                  />
-                  <button type="submit" className="search-button">
-                    <i className="icon-search"></i>
-                  </button>
-                </div>
-                
-                <div className="search-options">
-                  <div className="search-toggle-group">
-                    <label className="toggle-label">
-                      <input
-                        type="radio"
-                        name="searchMethod"
-                        value="database"
-                        checked={searchOptions.searchMethod === 'database'}
-                        onChange={handleSearchOptionsChange}
-                        aria-label="Search database"
-                      />
-                      <span className="toggle-button">Database</span>
-                    </label>
-                    <label className="toggle-label">
-                      <input
-                        type="radio"
-                        name="searchMethod"
-                        value="live"
-                        checked={searchOptions.searchMethod === 'live'}
-                        onChange={handleSearchOptionsChange}
-                        aria-label="Live Reddit search"
-                      />
-                      <span className="toggle-button">Live Reddit</span>
-                    </label>
-                  </div>
                   
-                  {searchOptions.searchMethod === 'live' && (
-                    <>
-                      <select 
-                        name="sortMethod" 
-                        value={searchOptions.sortMethod}
+                  {searchOptions.autoRefresh && (
+                    <div className="slider-group">
+                      <label htmlFor="refresh-interval">
+                        Refresh Interval: {searchOptions.refreshInterval}s
+                      </label>
+                      <input
+                        type="range"
+                        id="refresh-interval"
+                        name="refreshInterval"
+                        min="15"
+                        max="300"
+                        step="15"
+                        value={searchOptions.refreshInterval}
                         onChange={handleSearchOptionsChange}
-                        className="search-option-select"
-                        aria-label="Sort method"
-                      >
-                        <option value="relevance">Relevance</option>
-                        <option value="hot">Hot</option>
-                        <option value="new">New</option>
-                        <option value="top">Top</option>
-                      </select>
-                      
-                      <select 
-                        name="timeFilter" 
-                        value={searchOptions.timeFilter}
-                        onChange={handleSearchOptionsChange}
-                        className="search-option-select"
-                        aria-label="Time filter"
-                      >
-                        <option value="all">All Time</option>
-                        <option value="hour">Past Hour</option>
-                        <option value="day">Past Day</option>
-                        <option value="week">Past Week</option>
-                        <option value="month">Past Month</option>
-                        <option value="year">Past Year</option>
-                      </select>
-                    </>
-                  )}
-                </div>
-              </form>
-            </div>
-            
-            <div className="view-options">
-              <div className="export-container">
-                <button 
-                  className="export-button"
-                  onClick={() => setShowExportOptions(!showExportOptions)}
-                  aria-label="Export data options"
-                  aria-expanded={showExportOptions}
-                >
-                  <i className="icon-download"></i>
-                  <span className="button-text-hide-mobile">Export</span>
-                  <i className="icon-chevron-down"></i>
-                </button>
-                
-                {showExportOptions && (
-                  <div className="export-dropdown">
-                    <button onClick={() => exportData('csv')} className="export-option">
-                      <i className="icon-file-csv"></i>
-                      <span>Export as CSV</span>
-                    </button>
-                    <button onClick={() => exportData('json')} className="export-option">
-                      <i className="icon-file-json"></i>
-                      <span>Export as JSON</span>
-                    </button>
-                    <button onClick={() => exportData('html')} className="export-option">
-                      <i className="icon-file-html"></i>
-                      <span>Export as Report</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="display-options">
-                <label htmlFor="posts-per-page" className="select-label">Posts per page:</label>
-                <select
-                  id="posts-per-page"
-                  value={postsPerPage}
-                  onChange={(e) => {
-                    setPostsPerPage(parseInt(e.target.value));
-                    // Save preference if user is logged in
-                    if (currentUser) {
-                      updatePreferences({
-                        ...currentUser.preferences,
-                        postsPerPage: parseInt(e.target.value)
-                      });
-                    }
-                  }}
-                  className="display-select"
-                  aria-label="Posts per page"
-                >
-                  <option value="10">10</option>
-                  <option value="25">25</option>
-                  <option value="50">50</option>
-                  <option value="100">100</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Visualizations section */}
-          <div className="visualization-section">
-            <div className="section-header">
-              <h2>Visualizations</h2>
-              <div className="visualization-controls">
-                <div className="visualization-tabs">
-                  <button
-                    className={`viz-tab ${visualizationType === 'sentimentDistribution' ? 'active' : ''}`}
-                    onClick={() => setVisualizationType('sentimentDistribution')}
-                    aria-pressed={visualizationType === 'sentimentDistribution'}
-                  >
-                    Sentiment Distribution
-                  </button>
-                  <button
-                    className={`viz-tab ${visualizationType === 'sentimentOverTime' ? 'active' : ''}`}
-                    onClick={() => setVisualizationType('sentimentOverTime')}
-                    aria-pressed={visualizationType === 'sentimentOverTime'}
-                  >
-                    Sentiment Over Time
-                  </button>
-                  <button
-                    className={`viz-tab ${visualizationType === 'engagementVsSentiment' ? 'active' : ''}`}
-                    onClick={() => setVisualizationType('engagementVsSentiment')}
-                    aria-pressed={visualizationType === 'engagementVsSentiment'}
-                  >
-                    Engagement vs Sentiment
-                  </button>
-                  <button
-                    className={`viz-tab ${visualizationType === 'sentimentPie' ? 'active' : ''}`}
-                    onClick={() => setVisualizationType('sentimentPie')}
-                    aria-pressed={visualizationType === 'sentimentPie'}
-                  >
-                    Detailed Sentiment
-                  </button>
-                </div>
-                
-                <div className="visualization-options">
-                  <button 
-                    className="viz-option-button"
-                    onClick={() => setVisualizationConfig(prev => ({ ...prev, showLegend: !prev.showLegend }))}
-                    title={visualizationConfig.showLegend ? "Hide legend" : "Show legend"}
-                    aria-label={visualizationConfig.showLegend ? "Hide legend" : "Show legend"}
-                  >
-                    <i className={`icon-${visualizationConfig.showLegend ? 'eye' : 'eye-off'}`}></i>
-                  </button>
-                  <button 
-                    className="viz-option-button"
-                    onClick={() => setVisualizationConfig(prev => ({ ...prev, showGrid: !prev.showGrid }))}
-                    title={visualizationConfig.showGrid ? "Hide grid" : "Show grid"}
-                    aria-label={visualizationConfig.showGrid ? "Hide grid" : "Show grid"}
-                  >
-                    <i className={`icon-${visualizationConfig.showGrid ? 'grid' : 'grid-off'}`}></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="chart-container" style={{ height: visualizationConfig.height }}>
-              {filteredPosts.length === 0 ? (
-                <div className="no-data-message">
-                  <p>No data available for visualization. Try adjusting your filters.</p>
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  {visualizationType === 'sentimentDistribution' ? (
-                    <BarChart data={visualizationData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                      {visualizationConfig.showGrid && <CartesianGrid strokeDasharray="3 3" />}
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      {visualizationConfig.showTooltip && <Tooltip />}
-                      {visualizationConfig.showLegend && <Legend />}
-                      <Bar 
-                        dataKey="value" 
-                        name="Posts" 
-                        fill="#8884d8" 
-                        isAnimationActive={visualizationConfig.animate}
-                      >
-                        {visualizationData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  ) : visualizationType === 'sentimentOverTime' ? (
-                    <AreaChart data={visualizationData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                      {visualizationConfig.showGrid && <CartesianGrid strokeDasharray="3 3" />}
-                      <XAxis dataKey="date" />
-                      <YAxis yAxisId="left" orientation="left" />
-                      <YAxis yAxisId="right" orientation="right" domain={[-1, 1]} />
-                      {visualizationConfig.showTooltip && <Tooltip />}
-                      {visualizationConfig.showLegend && <Legend />}
-                      <Area 
-                        yAxisId="left" 
-                        type="monotone" 
-                        dataKey="positive" 
-                        name="Positive" 
-                        stackId="1"
-                        stroke={COLORS.positive[0]} 
-                        fill={COLORS.positive[2]} 
-                        isAnimationActive={visualizationConfig.animate} 
+                        aria-label="Refresh interval in seconds"
                       />
-                      <Area 
-                        yAxisId="left" 
-                        type="monotone" 
-                        dataKey="neutral" 
-                        name="Neutral" 
-                        stackId="1"
-                        stroke={COLORS.neutral[0]} 
-                        fill={COLORS.neutral[2]} 
-                        isAnimationActive={visualizationConfig.animate} 
-                      />
-                      <Area 
-                        yAxisId="left" 
-                        type="monotone" 
-                        dataKey="negative" 
-                        name="Negative" 
-                        stackId="1"
-                        stroke={COLORS.negative[0]} 
-                        fill={COLORS.negative[2]} 
-                        isAnimationActive={visualizationConfig.animate} 
-                      />
-                      <Line 
-                        yAxisId="right" 
-                        type="monotone" 
-                        dataKey="avgSentiment" 
-                        name="Avg Sentiment" 
-                        stroke={COLORS.accent[0]} 
-                        strokeWidth={2} 
-                        dot={{ r: 4 }}
-                        isAnimationActive={visualizationConfig.animate} 
-                      />
-                    </AreaChart>
-                  ) : visualizationType === 'engagementVsSentiment' ? (
-                    <BarChart data={visualizationData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                      {visualizationConfig.showGrid && <CartesianGrid strokeDasharray="3 3" />}
-                      <XAxis dataKey="name" />
-                      <YAxis yAxisId="left" orientation="left" />
-                      <YAxis yAxisId="right" orientation="right" domain={[-1, 1]} />
-                      {visualizationConfig.showTooltip && <Tooltip />}
-                      {visualizationConfig.showLegend && <Legend />}
-                      <Bar 
-                        yAxisId="left" 
-                        dataKey="score" 
-                        name="Score" 
-                        fill={COLORS.accent[0]} 
-                        isAnimationActive={visualizationConfig.animate} 
-                      />
-                      <Bar 
-                        yAxisId="left" 
-                        dataKey="comments" 
-                        name="Comments" 
-                        fill={COLORS.neutral[0]} 
-                        isAnimationActive={visualizationConfig.animate} 
-                      />
-                      <Line 
-                        yAxisId="right" 
-                        type="monotone" 
-                        dataKey="sentiment" 
-                        name="Sentiment" 
-                        stroke="#ff0000"
-                        isAnimationActive={visualizationConfig.animate} 
-                        strokeWidth={2}
-                      />
-                    </BarChart>
-                  ) : (
-                    <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                      <Pie
-                        data={visualizationData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={true}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        nameKey="name"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        isAnimationActive={visualizationConfig.animate}
-                      >
-                        {visualizationData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Pie>
-                      {visualizationConfig.showTooltip && <Tooltip />}
-                      {visualizationConfig.showLegend && <Legend />}
-                    </PieChart>
-                  )}
-                </ResponsiveContainer>
-              )}
-            </div>
-            
-            {filteredPosts.length > 0 && (
-              <div className="chart-caption">
-                {visualizationType === 'sentimentDistribution' && (
-                  <p>Distribution of post sentiment across {filteredPosts.length} posts.</p>
-                )}
-                {visualizationType === 'sentimentOverTime' && (
-                  <p>Sentiment trends over time, showing positive, neutral, and negative posts along with average sentiment score.</p>
-                )}
-                {visualizationType === 'engagementVsSentiment' && (
-                  <p>Relationship between post engagement (score and comments) and sentiment.</p>
-                )}
-                {visualizationType === 'sentimentPie' && (
-                  <p>Detailed breakdown of sentiment categories across all analyzed posts.</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Posts section */}
-          <div className="posts-section">
-            <div className="section-header">
-              <h2>
-                {isLiveSearch ? 'Live Reddit Posts' : 'Reddit Posts'}
-                {filters.searchTerm && (
-                  <span className="search-term-display"> for "{filters.searchTerm}"</span>
-                )}
-              </h2>
-              
-              {filteredPosts.length > 0 && (
-                <div className="results-info">
-                  <span>Showing {filteredPosts.length} result{filteredPosts.length !== 1 ? 's' : ''}</span>
-                </div>
-              )}
-            </div>
-
-            {filteredPosts.length > 0 ? (
-              <>
-                <div className="posts-table-container">
-                  <table className="posts-table">
-                    <thead>
-                      <tr>
-                        <th 
-                          className={`sortable ${sortConfig.key === 'title' ? `sorted-${sortConfig.direction}` : ''}`}
-                          onClick={() => requestSort('title')}
-                        >
-                          Title
-                          {sortConfig.key === 'title' && (
-                            <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th 
-                          className={`sortable ${sortConfig.key === 'score' ? `sorted-${sortConfig.direction}` : ''}`}
-                          onClick={() => requestSort('score')}
-                        >
-                          Score
-                          {sortConfig.key === 'score' && (
-                            <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th 
-                          className={`sortable ${sortConfig.key === 'num_comments' ? `sorted-${sortConfig.direction}` : ''}`}
-                          onClick={() => requestSort('num_comments')}
-                        >
-                          Comments
-                          {sortConfig.key === 'num_comments' && (
-                            <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th 
-                          className={`sortable ${sortConfig.key === 'sentiment_compound' ? `sorted-${sortConfig.direction}` : ''}`}
-                          onClick={() => requestSort('sentiment_compound')}
-                        >
-                          Sentiment
-                          {sortConfig.key === 'sentiment_compound' && (
-                            <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th 
-                          className={`sortable ${sortConfig.key === 'created_utc' ? `sorted-${sortConfig.direction}` : ''}`}
-                          onClick={() => requestSort('created_utc')}
-                        >
-                          Date
-                          {sortConfig.key === 'created_utc' && (
-                            <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
-                          )}
-                        </th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredPosts.slice(0, postsPerPage).map(post => (
-                        <tr key={post.id} className="post-row">
-                          <td className="post-title-cell">
-                            <div className="post-title">
-                              {post.title}
-                              {post.subreddit && (
-                                <span className="subreddit-tag">r/{post.subreddit}</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="post-score-cell">
-                            <div className="score-badge">{post.score}</div>
-                          </td>
-                          <td className="post-comments-cell">
-                            <div className="comments-badge">
-                              <i className="icon-message-circle"></i>
-                              <span>{post.num_comments}</span>
-                            </div>
-                          </td>
-                          <td className="post-sentiment-cell">
-                            <div className={`sentiment-badge ${getSentimentClass(post.sentiment_compound)}`}>
-                              {post.sentiment_compound.toFixed(2)}
-                            </div>
-                          </td>
-                          <td className="post-date-cell">
-                            <div className="post-date" title={formatDate(post.created_utc)}>
-                              {formatDate(post.created_utc, 'relative')}
-                            </div>
-                          </td>
-                          <td className="post-actions-cell">
-                            <div className="post-actions">
-                              <a 
-                                href={isValidUrl(post.url) ? post.url : '#'} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="action-button view-button"
-                                title="View on Reddit"
-                                onClick={(e) => {
-                                  if (!isValidUrl(post.url)) {
-                                    e.preventDefault();
-                                    console.warn('Invalid URL detected:', post.url);
-                                    alert('This post has an invalid URL. Please try the details view instead.');
-                                  }
-                                }}
-                              >
-                                <i className="icon-external-link"></i>
-                                <span className="button-text-hide-mobile">View</span>
-                              </a>
-                              <button
-                                className="action-button details-button"
-                                onClick={() => {
-                                  // First fetch comments, then show the modal
-                                  fetchComments(post.id);
-                                  toggleModal('viewPost', post.id);
-                                }}
-                                title="View details"
-                              >
-                                <i className="icon-info"></i>
-                                <span className="button-text-hide-mobile">Details</span>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                
-                <div className="posts-footer">
-                  <div className="pagination">
-                    <button
-                      onClick={() => {
-                        if (currentPage > 1) {
-                          setCurrentPage(prev => prev - 1);
-                        }
-                      }}
-                      disabled={currentPage === 1}
-                      className="pagination-button"
-                      aria-label="Previous page"
-                    >
-                      <i className="icon-chevron-left"></i>
-                      <span>Previous</span>
-                    </button>
-                    
-                    <div className="page-info">
-                      Page {currentPage} of {Math.max(1, Math.ceil(filteredPosts.length / postsPerPage))}
                     </div>
-                    
-                    <button
-                      onClick={() => {
-                        if (currentPage < Math.ceil(filteredPosts.length / postsPerPage)) {
-                          setCurrentPage(prev => prev + 1);
-                        }
-                      }}
-                      disabled={currentPage >= Math.ceil(filteredPosts.length / postsPerPage)}
-                      className="pagination-button"
-                      aria-label="Next page"
-                    >
-                      <span>Next</span>
-                      <i className="icon-chevron-right"></i>
-                    </button>
-                  </div>
-                  
-                  {hasMore && (
-                    <button 
-                      className="load-more-button"
-                      onClick={() => fetchPosts(false)}
-                      disabled={loadingMore}
-                    >
-                      {loadingMore ? (
-                        <>
-                          <div className="button-spinner"></div>
-                          <span>Loading more...</span>
-                        </>
-                      ) : (
-                        <>
-                          <i className="icon-plus"></i>
-                          <span>Load More Posts</span>
-                        </>
-                      )}
-                    </button>
                   )}
                 </div>
               </>
-            ) : error ? (
-              <div className="error-message">
-                <i className="icon-alert-circle"></i>
-                <p>{error.message}</p>
-                <button onClick={() => fetchPosts(true)} className="retry-button">
-                  <i className="icon-refresh"></i>
-                  <span>Retry</span>
+            )}
+
+            <button type="submit" className="apply-filters-button">
+              <i className="icon-filter"></i>
+              <span>Apply Filters</span>
+            </button>
+          </form>
+        </div>
+
+        {/* Statistics panel */}
+        <div className="stats-panel">
+          <h2 className="panel-header">Statistics</h2>
+          <div className="stat-item">
+            <span className="stat-label">Total Posts:</span>
+            <span className="stat-value">{statsData.totalPosts}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Average Score:</span>
+            <span className="stat-value">{statsData.avgScore}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Average Comments:</span>
+            <span className="stat-value">{statsData.avgComments}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Average Sentiment:</span>
+            <span className="stat-value">{statsData.avgSentiment}</span>
+          </div>
+          
+          <div className="sentiment-mini-chart">
+            <div className="sentiment-bar positive" style={{ width: `${statsData.sentimentBreakdown.positivePercent}%` }}></div>
+            <div className="sentiment-bar neutral" style={{ width: `${statsData.sentimentBreakdown.neutralPercent}%` }}></div>
+            <div className="sentiment-bar negative" style={{ width: `${statsData.sentimentBreakdown.negativePercent}%` }}></div>
+          </div>
+          
+          <div className="sentiment-mini-legend">
+            <div className="legend-item">
+              <span className="color-dot positive"></span>
+              <span>{statsData.sentimentBreakdown.positivePercent}%</span>
+            </div>
+            <div className="legend-item">
+              <span className="color-dot neutral"></span>
+              <span>{statsData.sentimentBreakdown.neutralPercent}%</span>
+            </div>
+            <div className="legend-item">
+              <span className="color-dot negative"></span>
+              <span>{statsData.sentimentBreakdown.negativePercent}%</span>
+            </div>
+          </div>
+          
+          <div className="stat-item">
+            <span className="stat-label">Data Source:</span>
+            <span className="stat-value">
+              {isLiveSearch ? 'Live Reddit API' : 'Local Database'}
+            </span>
+          </div>
+          
+          {lastUpdate && (
+            <div className="stat-item">
+              <span className="stat-label">Last Updated:</span>
+              <span className="stat-value">
+                {new Date(lastUpdate).toLocaleTimeString()}
+              </span>
+            </div>
+          )}
+          
+          {statsData.topSubreddits && statsData.topSubreddits.length > 0 && (
+            <div className="top-subreddits">
+              <h3>Top Subreddits</h3>
+              <ul className="subreddit-list">
+                {statsData.topSubreddits.map(sr => (
+                  <li key={sr.name} className="subreddit-item">
+                    <span className="subreddit-name">r/{sr.name}</span>
+                    <span className="subreddit-count">{sr.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      <main className="main-content">
+        {/* Search toolbar */}
+        <div className="search-toolbar">
+          <div className="search-container">
+            <form onSubmit={handleFilterSubmit} className="search-form">
+              <div className="search-input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Search posts..."
+                  value={filters.searchTerm}
+                  onChange={handleSearchChange}
+                  className="search-input"
+                  aria-label="Search posts"
+                />
+                <button type="submit" className="search-button">
+                  <i className="icon-search"></i>
                 </button>
               </div>
+              
+              <div className="search-options">
+                <div className="search-toggle-group">
+                  <label className="toggle-label">
+                    <input
+                      type="radio"
+                      name="searchMethod"
+                      value="database"
+                      checked={searchOptions.searchMethod === 'database'}
+                      onChange={handleSearchOptionsChange}
+                      aria-label="Search database"
+                    />
+                    <span className="toggle-button">Database</span>
+                  </label>
+                  <label className="toggle-label">
+                    <input
+                      type="radio"
+                      name="searchMethod"
+                      value="live"
+                      checked={searchOptions.searchMethod === 'live'}
+                      onChange={handleSearchOptionsChange}
+                      aria-label="Live Reddit search"
+                    />
+                    <span className="toggle-button">Live Reddit</span>
+                  </label>
+                </div>
+                
+                {searchOptions.searchMethod === 'live' && (
+                  <>
+                    <select 
+                      name="sortMethod" 
+                      value={searchOptions.sortMethod}
+                      onChange={handleSearchOptionsChange}
+                      className="search-option-select"
+                      aria-label="Sort method"
+                    >
+                      <option value="relevance">Relevance</option>
+                      <option value="hot">Hot</option>
+                      <option value="new">New</option>
+                      <option value="top">Top</option>
+                    </select>
+                    
+                    <select 
+                      name="timeFilter" 
+                      value={searchOptions.timeFilter}
+                      onChange={handleSearchOptionsChange}
+                      className="search-option-select"
+                      aria-label="Time filter"
+                    >
+                      <option value="all">All Time</option>
+                      <option value="hour">Past Hour</option>
+                      <option value="day">Past Day</option>
+                      <option value="week">Past Week</option>
+                      <option value="month">Past Month</option>
+                      <option value="year">Past Year</option>
+                    </select>
+                  </>
+                )}
+              </div>
+            </form>
+          </div>
+          
+          <div className="view-options">
+            <div className="export-container">
+              <button 
+                className="export-button"
+                onClick={() => setShowExportOptions(!showExportOptions)}
+                aria-label="Export data options"
+                aria-expanded={showExportOptions}
+              >
+                <i className="icon-download"></i>
+                <span className="button-text-hide-mobile">Export</span>
+                <i className="icon-chevron-down"></i>
+              </button>
+              
+              {showExportOptions && (
+                <div className="export-dropdown">
+                  <button onClick={() => exportData('csv')} className="export-option">
+                    <i className="icon-file-csv"></i>
+                    <span>Export as CSV</span>
+                  </button>
+                  <button onClick={() => exportData('json')} className="export-option">
+                    <i className="icon-file-json"></i>
+                    <span>Export as JSON</span>
+                  </button>
+                  <button onClick={() => exportData('html')} className="export-option">
+                    <i className="icon-file-html"></i>
+                    <span>Export as Report</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="display-options">
+              <label htmlFor="posts-per-page" className="select-label">Posts per page:</label>
+              <select
+                id="posts-per-page"
+                value={postsPerPage}
+                onChange={(e) => {
+                  setPostsPerPage(parseInt(e.target.value));
+                  // Save preference if user is logged in
+                  if (currentUser) {
+                    updatePreferences({
+                      ...currentUser.preferences,
+                      postsPerPage: parseInt(e.target.value)
+                    });
+                  }
+                }}
+                className="display-select"
+                aria-label="Posts per page"
+              >
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Visualizations section */}
+        <div className="visualization-section">
+          <div className="section-header">
+            <h2>Visualizations</h2>
+            <div className="visualization-controls">
+              <div className="visualization-tabs">
+                <button
+                  className={`viz-tab ${visualizationType === 'sentimentDistribution' ? 'active' : ''}`}
+                  onClick={() => setVisualizationType('sentimentDistribution')}
+                  aria-pressed={visualizationType === 'sentimentDistribution'}
+                >
+                  Sentiment Distribution
+                </button>
+                <button
+                  className={`viz-tab ${visualizationType === 'sentimentOverTime' ? 'active' : ''}`}
+                  onClick={() => setVisualizationType('sentimentOverTime')}
+                  aria-pressed={visualizationType === 'sentimentOverTime'}
+                >
+                  Sentiment Over Time
+                </button>
+                <button
+                  className={`viz-tab ${visualizationType === 'engagementVsSentiment' ? 'active' : ''}`}
+                  onClick={() => setVisualizationType('engagementVsSentiment')}
+                  aria-pressed={visualizationType === 'engagementVsSentiment'}
+                >
+                  Engagement vs Sentiment
+                </button>
+                <button
+                  className={`viz-tab ${visualizationType === 'sentimentPie' ? 'active' : ''}`}
+                  onClick={() => setVisualizationType('sentimentPie')}
+                  aria-pressed={visualizationType === 'sentimentPie'}
+                >
+                  Detailed Sentiment
+                </button>
+              </div>
+              
+              <div className="visualization-options">
+                <button 
+                  className="viz-option-button"
+                  onClick={() => setVisualizationConfig(prev => ({ ...prev, showLegend: !prev.showLegend }))}
+                  title={visualizationConfig.showLegend ? "Hide legend" : "Show legend"}
+                  aria-label={visualizationConfig.showLegend ? "Hide legend" : "Show legend"}
+                >
+                  <i className={`icon-${visualizationConfig.showLegend ? 'eye' : 'eye-off'}`}></i>
+                </button>
+                <button 
+                  className="viz-option-button"
+                  onClick={() => setVisualizationConfig(prev => ({ ...prev, showGrid: !prev.showGrid }))}
+                  title={visualizationConfig.showGrid ? "Hide grid" : "Show grid"}
+                  aria-label={visualizationConfig.showGrid ? "Hide grid" : "Show grid"}
+                >
+                  <i className={`icon-${visualizationConfig.showGrid ? 'grid' : 'grid-off'}`}></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="chart-container" style={{ height: visualizationConfig.height }}>
+            {filteredPosts.length === 0 ? (
+              <div className="no-data-message">
+                <p>No data available for visualization. Try adjusting your filters.</p>
+              </div>
             ) : (
-              <div className="no-posts-message">
-                <i className="icon-search"></i>
-                <p>No posts found matching your criteria. Try adjusting your filters or search term.</p>
+              <ResponsiveContainer width="100%" height="100%">
+                {visualizationType === 'sentimentDistribution' ? (
+                  <BarChart data={visualizationData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    {visualizationConfig.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    {visualizationConfig.showTooltip && <Tooltip />}
+                    {visualizationConfig.showLegend && <Legend />}
+                    <Bar 
+                      dataKey="value" 
+                      name="Posts" 
+                      fill="#8884d8" 
+                      isAnimationActive={visualizationConfig.animate}
+                    >
+                      {visualizationData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                ) : visualizationType === 'sentimentOverTime' ? (
+                  <AreaChart data={visualizationData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    {visualizationConfig.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                    <XAxis dataKey="date" />
+                    <YAxis yAxisId="left" orientation="left" />
+                    <YAxis yAxisId="right" orientation="right" domain={[-1, 1]} />
+                    {visualizationConfig.showTooltip && <Tooltip />}
+                    {visualizationConfig.showLegend && <Legend />}
+                    <Area 
+                      yAxisId="left" 
+                      type="monotone" 
+                      dataKey="positive" 
+                      name="Positive" 
+                      stackId="1"
+                      stroke={COLORS.positive[0]} 
+                      fill={COLORS.positive[2]} 
+                      isAnimationActive={visualizationConfig.animate} 
+                    />
+                    <Area 
+                      yAxisId="left" 
+                      type="monotone" 
+                      dataKey="neutral" 
+                      name="Neutral" 
+                      stackId="1"
+                      stroke={COLORS.neutral[0]} 
+                      fill={COLORS.neutral[2]} 
+                      isAnimationActive={visualizationConfig.animate} 
+                    />
+                    <Area 
+                      yAxisId="left" 
+                      type="monotone" 
+                      dataKey="negative" 
+                      name="Negative" 
+                      stackId="1"
+                      stroke={COLORS.negative[0]} 
+                      fill={COLORS.negative[2]} 
+                      isAnimationActive={visualizationConfig.animate} 
+                    />
+                    <Line 
+                      yAxisId="right" 
+                      type="monotone" 
+                      dataKey="avgSentiment" 
+                      name="Avg Sentiment" 
+                      stroke={COLORS.accent[0]} 
+                      strokeWidth={2} 
+                      dot={{ r: 4 }}
+                      isAnimationActive={visualizationConfig.animate} 
+                    />
+                  </AreaChart>
+                ) : visualizationType === 'engagementVsSentiment' ? (
+                  <BarChart data={visualizationData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    {visualizationConfig.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                    <XAxis dataKey="name" />
+                    <YAxis yAxisId="left" orientation="left" />
+                    <YAxis yAxisId="right" orientation="right" domain={[-1, 1]} />
+                    {visualizationConfig.showTooltip && <Tooltip />}
+                    {visualizationConfig.showLegend && <Legend />}
+                    <Bar 
+                      yAxisId="left" 
+                      dataKey="score" 
+                      name="Score" 
+                      fill={COLORS.accent[0]} 
+                      isAnimationActive={visualizationConfig.animate} 
+                    />
+                    <Bar 
+                      yAxisId="left" 
+                      dataKey="comments" 
+                      name="Comments" 
+                      fill={COLORS.neutral[0]} 
+                      isAnimationActive={visualizationConfig.animate} 
+                    />
+                    <Line 
+                      yAxisId="right" 
+                      type="monotone" 
+                      dataKey="sentiment" 
+                      name="Sentiment" 
+                      stroke="#ff0000"
+                      isAnimationActive={visualizationConfig.animate} 
+                      strokeWidth={2}
+                    />
+                  </BarChart>
+                ) : (
+                  <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                    <Pie
+                      data={visualizationData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={true}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      isAnimationActive={visualizationConfig.animate}
+                    >
+                      {visualizationData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    {visualizationConfig.showTooltip && <Tooltip />}
+                    {visualizationConfig.showLegend && <Legend />}
+                  </PieChart>
+                )}
+              </ResponsiveContainer>
+            )}
+          </div>
+          
+          {filteredPosts.length > 0 && (
+            <div className="chart-caption">
+              {visualizationType === 'sentimentDistribution' && (
+                <p>Distribution of post sentiment across {filteredPosts.length} posts.</p>
+              )}
+              {visualizationType === 'sentimentOverTime' && (
+                <p>Sentiment trends over time, showing positive, neutral, and negative posts along with average sentiment score.</p>
+              )}
+              {visualizationType === 'engagementVsSentiment' && (
+                <p>Relationship between post engagement (score and comments) and sentiment.</p>
+              )}
+              {visualizationType === 'sentimentPie' && (
+                <p>Detailed breakdown of sentiment categories across all analyzed posts.</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Posts section */}
+        <div className="posts-section">
+          <div className="section-header">
+            <h2>
+              {isLiveSearch ? 'Live Reddit Posts' : 'Reddit Posts'}
+              {filters.searchTerm && (
+                <span className="search-term-display"> for "{filters.searchTerm}"</span>
+              )}
+            </h2>
+            
+            {filteredPosts.length > 0 && (
+              <div className="results-info">
+                <span>Showing {filteredPosts.length} result{filteredPosts.length !== 1 ? 's' : ''}</span>
               </div>
             )}
           </div>
-        </main>
-      </div>
 
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-logo">
-            <h3>Reddit Sentiment Dashboard</h3>
-            <p>Analyzing Reddit sentiment with VADER and React</p>
-          </div>
-          
-          <div className="footer-links">
-            <h4>Resources</h4>
-            <ul>
-              <li><a href="https://github.com/cjhutto/vaderSentiment" target="_blank" rel="noopener noreferrer">VADER Sentiment Analysis</a></li>
-              <li><a href="https://www.reddit.com/dev/api/" target="_blank" rel="noopener noreferrer">Reddit API</a></li>
-              <li><a href="https://reactjs.org/" target="_blank" rel="noopener noreferrer">React</a></li>
-            </ul>
-          </div>
-          
-          <div className="footer-info">
-            <p>&copy; {new Date().getFullYear()} Reddit Sentiment Dashboard</p>
-            <p>Version 2.0.0</p>
-          </div>
-        </div>
-      </footer>
-      
-      {/* Modals */}
-      <Suspense fallback={null}>
-        {/* Auth Modal */}
-        <AuthModal 
-          isOpen={modals.auth} 
-          onClose={() => toggleModal('auth', false)} 
-        />
-        
-        {/* Save Filter Modal */}
-        <SaveFilterModal
-          isOpen={modals.saveFilter}
-          onClose={() => toggleModal('saveFilter', false)}
-          currentFilters={filters}
-        />
-        
-        {/* Share Dashboard Modal */}
-        {modals.shareModal && (
-          <div className="modal-overlay">
-            <div className="modal-container">
-              <button className="modal-close" onClick={() => toggleModal('shareModal', false)}>
-                <i className="icon-x"></i>
-              </button>
-              
-              <div className="modal-header">
-                <h2>Share Dashboard</h2>
+          {filteredPosts.length > 0 ? (
+            <>
+              <div className="posts-table-container">
+                <table className="posts-table">
+                  <thead>
+                    <tr>
+                      <th 
+                        className={`sortable ${sortConfig.key === 'title' ? `sorted-${sortConfig.direction}` : ''}`}
+                        onClick={() => requestSort('title')}
+                      >
+                        Title
+                        {sortConfig.key === 'title' && (
+                          <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
+                        )}
+                      </th>
+                      <th 
+                        className={`sortable ${sortConfig.key === 'score' ? `sorted-${sortConfig.direction}` : ''}`}
+                        onClick={() => requestSort('score')}
+                      >
+                        Score
+                        {sortConfig.key === 'score' && (
+                          <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
+                        )}
+                      </th>
+                      <th 
+                        className={`sortable ${sortConfig.key === 'num_comments' ? `sorted-${sortConfig.direction}` : ''}`}
+                        onClick={() => requestSort('num_comments')}
+                      >
+                        Comments
+                        {sortConfig.key === 'num_comments' && (
+                          <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
+                        )}
+                      </th>
+                      <th 
+                        className={`sortable ${sortConfig.key === 'sentiment_compound' ? `sorted-${sortConfig.direction}` : ''}`}
+                        onClick={() => requestSort('sentiment_compound')}
+                      >
+                        Sentiment
+                        {sortConfig.key === 'sentiment_compound' && (
+                          <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
+                        )}
+                      </th>
+                      <th 
+                        className={`sortable ${sortConfig.key === 'created_utc' ? `sorted-${sortConfig.direction}` : ''}`}
+                        onClick={() => requestSort('created_utc')}
+                      >
+                        Date
+                        {sortConfig.key === 'created_utc' && (
+                          <i className={`icon-chevron-${sortConfig.direction === 'asc' ? 'up' : 'down'}`}></i>
+                        )}
+                      </th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPosts.slice(0, postsPerPage).map(post => (
+                      <tr key={post.id} className="post-row">
+                        <td className="post-title-cell">
+                          <div className="post-title">
+                            {post.title}
+                            {post.subreddit && (
+                              <span className="subreddit-tag">r/{post.subreddit}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="post-score-cell">
+                          <div className="score-badge">{post.score}</div>
+                        </td>
+                        <td className="post-comments-cell">
+                          <div className="comments-badge">
+                            <i className="icon-message-circle"></i>
+                            <span>{post.num_comments}</span>
+                          </div>
+                        </td>
+                        <td className="post-sentiment-cell">
+                          <div className={`sentiment-badge ${getSentimentClass(post.sentiment_compound)}`}>
+                            {post.sentiment_compound.toFixed(2)}
+                          </div>
+                        </td>
+                        <td className="post-date-cell">
+                          <div className="post-date" title={formatDate(post.created_utc)}>
+                            {formatDate(post.created_utc, 'relative')}
+                          </div>
+                        </td>
+                        <td className="post-actions-cell">
+                          <div className="post-actions">
+                            <a 
+                              href={isValidUrl(post.url) ? post.url : '#'} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="action-button view-button"
+                              title="View on Reddit"
+                              onClick={(e) => {
+                                if (!isValidUrl(post.url)) {
+                                  e.preventDefault();
+                                  console.warn('Invalid URL detected:', post.url);
+                                  alert('This post has an invalid URL. Please try the details view instead.');
+                                }
+                              }}
+                            >
+                              <i className="icon-external-link"></i>
+                              <span className="button-text-hide-mobile">View</span>
+                            </a>
+                            <button
+                              className="action-button details-button"
+                              onClick={() => {
+                                // First fetch comments, then show the modal
+                                fetchComments(post.id);
+                                toggleModal('viewPost', post.id);
+                              }}
+                              title="View details"
+                            >
+                              <i className="icon-info"></i>
+                              <span className="button-text-hide-mobile">Details</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
               
-              <div className="modal-body">
-                <p>Share this dashboard with others by copying the link below:</p>
-                
-                <div className="share-url-container">
-                  <input
-                    type="text"
-                    value={shareUrl}
-                    readOnly
-                    className="share-url-input"
-                    ref={node => node && node.select()}
-                  />
-                  
+              <div className="posts-footer">
+                <div className="pagination">
                   <button
-                    className="copy-button"
                     onClick={() => {
-                      navigator.clipboard.writeText(shareUrl);
-                      alert('Link copied to clipboard!');
+                      if (currentPage > 1) {
+                        setCurrentPage(prev => prev - 1);
+                      }
                     }}
+                    disabled={currentPage === 1}
+                    className="pagination-button"
+                    aria-label="Previous page"
                   >
-                    <i className="icon-copy"></i>
+                    <i className="icon-chevron-left"></i>
+                    <span>Previous</span>
+                  </button>
+                  
+                  <div className="page-info">
+                    Page {currentPage} of {Math.max(1, Math.ceil(filteredPosts.length / postsPerPage))}
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      if (currentPage < Math.ceil(filteredPosts.length / postsPerPage)) {
+                        setCurrentPage(prev => prev + 1);
+                      }
+                    }}
+                    disabled={currentPage >= Math.ceil(filteredPosts.length / postsPerPage)}
+                    className="pagination-button"
+                    aria-label="Next page"
+                  >
+                    <span>Next</span>
+                    <i className="icon-chevron-right"></i>
                   </button>
                 </div>
                 
-                <div className="social-share-buttons">
-                  <button
-                    className="social-share-button twitter"
-                    onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent('Check out this Reddit sentiment analysis dashboard!')}`, '_blank')}
+                {hasMore && (
+                  <button 
+                    className="load-more-button"
+                    onClick={() => fetchPosts(false, filters)} // MODIFIED: Pass current filters explicitly
+                    disabled={loadingMore}
                   >
-                    <i className="icon-twitter"></i>
-                    <span>Twitter</span>
+                    {loadingMore ? (
+                      <>
+                        <div className="button-spinner"></div>
+                        <span>Loading more...</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="icon-plus"></i>
+                        <span>Load More Posts</span>
+                      </>
+                    )}
                   </button>
-                  
-                  <button
-                    className="social-share-button email"
-                    onClick={() => window.open(`mailto:?subject=${encodeURIComponent('Reddit Sentiment Dashboard')}&body=${encodeURIComponent(`Check out this Reddit sentiment analysis dashboard: ${shareUrl}`)}`, '_blank')}
-                  >
-                    <i className="icon-mail"></i>
-                    <span>Email</span>
-                  </button>
-                </div>
+                )}
+              </div>
+            </>
+          ) : error ? (
+            <div className="error-message">
+              <i className="icon-alert-circle"></i>
+              <p>{error.message}</p>
+              <button onClick={() => fetchPosts(true, filters)} className="retry-button"> // MODIFIED: Pass current filters explicitly
+                <i className="icon-refresh"></i>
+                <span>Retry</span>
+              </button>
+            </div>
+          ) : (
+            <div className="no-posts-message">
+              <i className="icon-search"></i>
+              <p>No posts found matching your criteria. Try adjusting your filters or search term.</p>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+
+    <footer className="footer">
+      <div className="footer-content">
+        <div className="footer-logo">
+          <h3>Reddit Sentiment Dashboard</h3>
+          <p>Analyzing Reddit sentiment with VADER and React</p>
+        </div>
+        
+        <div className="footer-links">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="https://github.com/cjhutto/vaderSentiment" target="_blank" rel="noopener noreferrer">VADER Sentiment Analysis</a></li>
+            <li><a href="https://www.reddit.com/dev/api/" target="_blank" rel="noopener noreferrer">Reddit API</a></li>
+            <li><a href="https://reactjs.org/" target="_blank" rel="noopener noreferrer">React</a></li>
+          </ul>
+        </div>
+        
+        <div className="footer-info">
+          <p>&copy; {new Date().getFullYear()} Reddit Sentiment Dashboard</p>
+          <p>Version 2.0.0</p>
+        </div>
+      </div>
+    </footer>
+    
+    {/* Modals */}
+    <Suspense fallback={null}>
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={modals.auth} 
+        onClose={() => toggleModal('auth', false)} 
+      />
+      
+      {/* Save Filter Modal */}
+      <SaveFilterModal
+        isOpen={modals.saveFilter}
+        onClose={() => toggleModal('saveFilter', false)}
+        currentFilters={filters}
+      />
+      
+      {/* Share Dashboard Modal */}
+      {modals.shareModal && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <button className="modal-close" onClick={() => toggleModal('shareModal', false)}>
+              <i className="icon-x"></i>
+            </button>
+            
+            <div className="modal-header">
+              <h2>Share Dashboard</h2>
+            </div>
+            
+            <div className="modal-body">
+              <p>Share this dashboard with others by copying the link below:</p>
+              
+              <div className="share-url-container">
+                <input
+                  type="text"
+                  value={shareUrl}
+                  readOnly
+                  className="share-url-input"
+                  ref={node => node && node.select()}
+                />
+                
+                <button
+                  className="copy-button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(shareUrl);
+                    alert('Link copied to clipboard!');
+                  }}
+                >
+                  <i className="icon-copy"></i>
+                </button>
               </div>
               
-              <div className="modal-footer">
+              <div className="social-share-buttons">
                 <button
-                  className="modal-button cancel"
-                  onClick={() => toggleModal('shareModal', false)}
+                  className="social-share-button twitter"
+                  onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent('Check out this Reddit sentiment analysis dashboard!')}`, '_blank')}
                 >
-                  Close
+                  <i className="icon-twitter"></i>
+                  <span>Twitter</span>
+                </button>
+                
+                <button
+                  className="social-share-button email"
+                  onClick={() => window.open(`mailto:?subject=${encodeURIComponent('Reddit Sentiment Dashboard')}&body=${encodeURIComponent(`Check out this Reddit sentiment analysis dashboard: ${shareUrl}`)}`, '_blank')}
+                >
+                  <i className="icon-mail"></i>
+                  <span>Email</span>
                 </button>
               </div>
             </div>
-          </div>
-        )}
-        
-        {/* Post Detail Modal */}
-        {modals.viewPost && (
-          <div className="modal-overlay">
-            <div className="modal-container post-detail-modal">
-              <button className="modal-close" onClick={() => toggleModal('viewPost', null)}>
-                <i className="icon-x"></i>
+            
+            <div className="modal-footer">
+              <button
+                className="modal-button cancel"
+                onClick={() => toggleModal('shareModal', false)}
+              >
+                Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Post Detail Modal */}
+      {modals.viewPost && (
+        <div className="modal-overlay">
+          <div className="modal-container post-detail-modal">
+            <button className="modal-close" onClick={() => toggleModal('viewPost', null)}>
+              <i className="icon-x"></i>
+            </button>
+            
+            {(() => {
+              const post = filteredPosts.find(p => p.id === modals.viewPost);
               
-              {(() => {
-                const post = filteredPosts.find(p => p.id === modals.viewPost);
-                
-                if (!post) {
-                  return (
-                    <div className="modal-body">
-                      <p>Post not found.</p>
-                    </div>
-                  );
-                }
-                
+              if (!post) {
                 return (
-                  <>
-                    <div className="modal-header">
-                      <h2>{post.title}</h2>
-                      <div className="post-meta">
-                        <span className="post-subreddit">r/{post.subreddit}</span>
-                        <span className="post-author">Posted by u/{post.author}</span>
-                        <span className="post-date">{formatDate(post.created_utc)}</span>
+                  <div className="modal-body">
+                    <p>Post not found.</p>
+                  </div>
+                );
+              }
+              
+              return (
+                <>
+                  <div className="modal-header">
+                    <h2>{post.title}</h2>
+                    <div className="post-meta">
+                      <span className="post-subreddit">r/{post.subreddit}</span>
+                      <span className="post-author">Posted by u/{post.author}</span>
+                      <span className="post-date">{formatDate(post.created_utc)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="modal-body">
+                    <div className="post-content">
+                      {post.selftext ? (
+                        <div className="post-text">{post.selftext}</div>
+                      ) : (
+                        <div className="post-url">
+                          <a href={isValidUrl(post.url) ? post.url : '#'} target="_blank" rel="noopener noreferrer">{post.url}</a>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="post-stats">
+                      <div className="post-stat">
+                        <span className="stat-label">Score:</span>
+                        <span className="stat-value">{post.score}</span>
+                      </div>
+                      <div className="post-stat">
+                        <span className="stat-label">Comments:</span>
+                        <span className="stat-value">{post.num_comments}</span>
+                      </div>
+                      <div className="post-stat">
+                        <span className="stat-label">Upvote Ratio:</span>
+                        <span className="stat-value">{(post.upvote_ratio * 100).toFixed(0)}%</span>
                       </div>
                     </div>
                     
-                    <div className="modal-body">
-                      <div className="post-content">
-                        {post.selftext ? (
-                          <div className="post-text">{post.selftext}</div>
-                        ) : (
-                          <div className="post-url">
-                            <a href={isValidUrl(post.url) ? post.url : '#'} target="_blank" rel="noopener noreferrer">{post.url}</a>
+                    <div className="sentiment-analysis">
+                      <h3>Sentiment Analysis</h3>
+                      
+                      <div className="sentiment-meter">
+                        <div className="sentiment-scale">
+                          <div className="scale-negative">Negative</div>
+                          <div className="scale-neutral">Neutral</div>
+                          <div className="scale-positive">Positive</div>
+                        </div>
+                        <div className="sentiment-indicator" style={{ 
+                          left: `${((post.sentiment_compound + 1) / 2) * 100}%` 
+                        }}></div>
+                      </div>
+                      
+                      <div className="sentiment-details">
+                        <div className="sentiment-detail">
+                          <span className="detail-label">Compound:</span>
+                          <span className={`detail-value ${getSentimentClass(post.sentiment_compound)}`}>
+                            {post.sentiment_compound.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="sentiment-detail">
+                          <span className="detail-label">Positive:</span>
+                          <span className="detail-value">{(post.sentiment_pos * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="sentiment-detail">
+                          <span className="detail-label">Neutral:</span>
+                          <span className="detail-value">{(post.sentiment_neu * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="sentiment-detail">
+                          <span className="detail-label">Negative:</span>
+                          <span className="detail-value">{(post.sentiment_neg * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {comments.length > 0 && (
+                      <div className="post-comments">
+                        <h3>Top Comments</h3>
+                        
+                        <div className="comments-list">
+                          {comments.map(comment => (
+                            <div key={comment.id} className="comment">
+                              <div className="comment-header">
+                                <span className="comment-author">u/{comment.author}</span>
+                                <span className="comment-score">{comment.score} points</span>
+                                <span className="comment-date">{formatDate(comment.created_utc, 'relative')}</span>
+                              </div>
+                              <div className="comment-body">{comment.body}</div>
+                              <div className="comment-sentiment">
+                                <span className={`sentiment-badge small ${getSentimentClass(comment.sentiment_compound)}`}>
+                                  {comment.sentiment_compound.toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {loadingComments && (
+                          <div className="comments-loading">
+                            <div className="loading-spinner small"></div>
+                            <span>Loading comments...</span>
                           </div>
                         )}
                       </div>
-                      
-                      <div className="post-stats">
-                        <div className="post-stat">
-                          <span className="stat-label">Score:</span>
-                          <span className="stat-value">{post.score}</span>
-                        </div>
-                        <div className="post-stat">
-                          <span className="stat-label">Comments:</span>
-                          <span className="stat-value">{post.num_comments}</span>
-                        </div>
-                        <div className="post-stat">
-                          <span className="stat-label">Upvote Ratio:</span>
-                          <span className="stat-value">{(post.upvote_ratio * 100).toFixed(0)}%</span>
-                        </div>
-                      </div>
-                      
-                      <div className="sentiment-analysis">
-                        <h3>Sentiment Analysis</h3>
-                        
-                        <div className="sentiment-meter">
-                          <div className="sentiment-scale">
-                            <div className="scale-negative">Negative</div>
-                            <div className="scale-neutral">Neutral</div>
-                            <div className="scale-positive">Positive</div>
-                          </div>
-                          <div className="sentiment-indicator" style={{ 
-                            left: `${((post.sentiment_compound + 1) / 2) * 100}%` 
-                          }}></div>
-                        </div>
-                        
-                        <div className="sentiment-details">
-                          <div className="sentiment-detail">
-                            <span className="detail-label">Compound:</span>
-                            <span className={`detail-value ${getSentimentClass(post.sentiment_compound)}`}>
-                              {post.sentiment_compound.toFixed(2)}
-                            </span>
-                          </div>
-                          <div className="sentiment-detail">
-                            <span className="detail-label">Positive:</span>
-                            <span className="detail-value">{(post.sentiment_pos * 100).toFixed(1)}%</span>
-                          </div>
-                          <div className="sentiment-detail">
-                            <span className="detail-label">Neutral:</span>
-                            <span className="detail-value">{(post.sentiment_neu * 100).toFixed(1)}%</span>
-                          </div>
-                          <div className="sentiment-detail">
-                            <span className="detail-label">Negative:</span>
-                            <span className="detail-value">{(post.sentiment_neg * 100).toFixed(1)}%</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {comments.length > 0 && (
-                        <div className="post-comments">
-                          <h3>Top Comments</h3>
-                          
-                          <div className="comments-list">
-                            {comments.map(comment => (
-                              <div key={comment.id} className="comment">
-                                <div className="comment-header">
-                                  <span className="comment-author">u/{comment.author}</span>
-                                  <span className="comment-score">{comment.score} points</span>
-                                  <span className="comment-date">{formatDate(comment.created_utc, 'relative')}</span>
-                                </div>
-                                <div className="comment-body">{comment.body}</div>
-                                <div className="comment-sentiment">
-                                  <span className={`sentiment-badge small ${getSentimentClass(comment.sentiment_compound)}`}>
-                                    {comment.sentiment_compound.toFixed(2)}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                          
-                          {loadingComments && (
-                            <div className="comments-loading">
-                              <div className="loading-spinner small"></div>
-                              <span>Loading comments...</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      
-                      {!comments.length && !loadingComments && (
-                        <div className="comments-actions">
-                          <button 
-                            className="load-comments-button"
-                            onClick={() => fetchComments(post.id)}
-                            disabled={loadingComments}
-                          >
-                            <i className="icon-message-circle"></i>
-                            <span>Load Comments</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    )}
                     
-                    <div className="modal-footer">
-                      <a 
-                        href={isValidUrl(post.url) ? post.url : '#'} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="modal-button primary"
-                        onClick={(e) => {
-                          if (!isValidUrl(post.url)) {
-                            e.preventDefault();
-                            alert('This post has an invalid URL.');
-                          }
-                        }}
-                      >
-                        View on Reddit
-                      </a>
-                      <button
-                        className="modal-button secondary"
-                        onClick={() => toggleModal('viewPost', null)}
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
+                    {!comments.length && !loadingComments && (
+                      <div className="comments-actions">
+                        <button 
+                          className="load-comments-button"
+                          onClick={() => fetchComments(post.id)}
+                          disabled={loadingComments}
+                        >
+                          <i className="icon-message-circle"></i>
+                          <span>Load Comments</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="modal-footer">
+                    <a 
+                      href={isValidUrl(post.url) ? post.url : '#'} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="modal-button primary"
+                      onClick={(e) => {
+                        if (!isValidUrl(post.url)) {
+                          e.preventDefault();
+                          alert('This post has an invalid URL.');
+                        }
+                      }}
+                    >
+                      View on Reddit
+                    </a>
+                    <button
+                      className="modal-button secondary"
+                      onClick={() => toggleModal('viewPost', null)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
-        )}
-      </Suspense>
-    </div>
-  );
+        </div>
+      )}
+    </Suspense>
+  </div>
+);
 }
 
 export default App;
