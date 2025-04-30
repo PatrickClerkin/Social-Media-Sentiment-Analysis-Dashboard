@@ -6338,3 +6338,399 @@
 2025-04-30 18:30:32,373 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:30:32] "GET /posts?sort_by=created_utc&order=desc&live=true HTTP/1.1" 200 -
 2025-04-30 18:30:32,670 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
 2025-04-30 18:30:32,670 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:30:32] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:35:54,639 - __main__ - INFO - Reddit API client initialized successfully
+2025-04-30 18:35:54,665 - __main__ - ERROR - Error creating database: no such column: subreddit
+2025-04-30 18:35:54,676 - __main__ - INFO - Database initialized
+2025-04-30 18:35:54,689 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-30 18:35:54,715 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.19:5000
+2025-04-30 18:35:54,721 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-30 18:37:07,631 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-30 18:37:07,634 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:37:07,642 - __main__ - INFO - Cached response for /posts?sort_by=created_utc&order=desc
+2025-04-30 18:37:07,644 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:37:07] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:37:07,646 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:37:07] "GET /posts?sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 18:37:07,887 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:37:07,887 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:37:07] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:37:07,964 - __main__ - INFO - Cache hit for /posts?sort_by=created_utc&order=desc
+2025-04-30 18:37:07,966 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:37:07] "GET /posts?sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 18:38:25,860 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-30 18:38:25,860 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:25,860 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:25] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:25,860 - __main__ - INFO - Cached response for /posts?sort_by=created_utc&order=desc&live=true
+2025-04-30 18:38:25,868 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:25] "GET /posts?sort_by=created_utc&order=desc&live=true HTTP/1.1" 200 -
+2025-04-30 18:38:54,102 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:54,112 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:54] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:54,396 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:54,405 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:54] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:54,527 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:54,527 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:54] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:54,855 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:54,859 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:54] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:55,031 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "GET /search?q=don&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:55,081 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "GET /search?q=d&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:55,118 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "GET /search?q=do&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:55,322 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "GET /search?q=dona&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:55,397 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:55,397 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:55,443 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "GET /search?q=donal&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:55,706 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:55,709 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:55,755 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "GET /search?q=donald&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:55,812 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:55] "GET /search?q=donald+&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:56,016 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:56,016 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:56] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:56,250 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:56] "GET /search?q=donald+t&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:56,334 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:56,336 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:56] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:56,749 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:56,772 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:56] "GET /search?q=donald+tr&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:56,772 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:56] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:56,796 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:56] "GET /search?q=donald+tru&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:57,199 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:57,232 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:57] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:57,661 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:57] "GET /search?q=donald+trum&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:57,664 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:57,664 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:57] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:57,794 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:57] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:38:57,979 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:38:57,979 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:57] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:38:58,949 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:38:58] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:39:02,674 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:02] "[33mGET /posts/1k1ncse/comments HTTP/1.1[0m" 404 -
+2025-04-30 18:39:15,658 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:15] "[33mGET /posts/1k9suss/comments HTTP/1.1[0m" 404 -
+2025-04-30 18:39:30,933 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:30,934 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:30] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,078 - __main__ - ERROR - Error in live search: received 400 HTTP response
+2025-04-30 18:39:31,078 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=p HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,186 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:31,191 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,297 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:31,297 - __main__ - ERROR - Error in live search: received 404 HTTP response
+2025-04-30 18:39:31,301 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,302 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=po HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,410 - __main__ - ERROR - Error in live search: received 404 HTTP response
+2025-04-30 18:39:31,412 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=pol HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,580 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:31,580 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,752 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:31,752 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,849 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=poli HTTP/1.1" 200 -
+2025-04-30 18:39:31,893 - __main__ - ERROR - Error in live search: received 404 HTTP response
+2025-04-30 18:39:31,893 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politi HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,895 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:31,904 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:31,970 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:31] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=polit HTTP/1.1" 200 -
+2025-04-30 18:39:32,243 - __main__ - ERROR - Error in live search: received 403 HTTP response
+2025-04-30 18:39:32,244 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:32] "[35m[1mGET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politic HTTP/1.1[0m" 500 -
+2025-04-30 18:39:32,271 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:32,271 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:32] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:32,550 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:32,550 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:32] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:32,926 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:32] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:39:34,055 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:34] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:39:36,908 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:36] "[33mGET /posts/1gl0ty4/comments HTTP/1.1[0m" 404 -
+2025-04-30 18:39:39,322 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:39] "[33mGET /posts/1gl0ty4/comments HTTP/1.1[0m" 404 -
+2025-04-30 18:39:53,494 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:53,497 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:53] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:53,946 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:53] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:39:54,447 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:54,447 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:54] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:54,673 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:54] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:39:55,280 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:55,280 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:55] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:55,770 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:55] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:39:56,282 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:56,284 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:56] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:56,428 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:56] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:39:57,084 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:57,087 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:57] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:57,531 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:57] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:39:58,180 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:39:58,180 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:58] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:39:58,375 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:39:58] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:00,026 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:00,028 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:00] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:00,276 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:00,276 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:00] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:00,504 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:00] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:01,071 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:01] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:01,567 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:01,570 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:01] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:01,964 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:01] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:05,327 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:05,327 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:05] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:05,901 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:05] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:08,249 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:08,254 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:08] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:08,527 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:08] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:10,522 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:10,524 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:10] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:11,061 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:11] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:12,455 - __main__ - ERROR - Error generating word cloud data: no such column: subreddit
+2025-04-30 18:40:12,455 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:12] "[35m[1mGET /wordcloud?subreddit=politics&search=donald+trump HTTP/1.1[0m" 500 -
+2025-04-30 18:40:12,826 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:12,826 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:12] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:13,263 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:13] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:13,281 - __main__ - ERROR - Error generating word cloud data: no such column: subreddit
+2025-04-30 18:40:13,281 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:13] "[35m[1mGET /wordcloud?subreddit=politics&search=donald+trump HTTP/1.1[0m" 500 -
+2025-04-30 18:40:13,722 - __main__ - ERROR - Error generating word cloud data: no such column: subreddit
+2025-04-30 18:40:13,722 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:13] "[35m[1mGET /wordcloud?subreddit=politics&search=donald+trump HTTP/1.1[0m" 500 -
+2025-04-30 18:40:14,658 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:14,661 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:14] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:14,844 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:14] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:20,687 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:20,687 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:20] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:21,256 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:21] "GET /search?q=donald+trump&sort=hot&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:24,439 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:24,439 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:24] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:24,583 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:24] "GET /search?q=donald+trump&sort=new&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:40:31,588 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:31,588 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:32,392 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:32] "GET /search?q=donald+trump&sort=new&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:40:34,383 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:34] "GET /search?q=donald+trump&sort=new&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:40:38,351 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:38,355 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:38] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:38,855 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:38] "GET /search?q=donald+trump&sort=hot&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:40:41,830 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:41,832 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:41] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:40:41,992 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:41] "GET /search?q=donald+trump&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:40:56,111 - __main__ - INFO - Cache hit for /posts?sort_by=created_utc&order=desc&live=true
+2025-04-30 18:40:56,114 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:56] "GET /posts?sort_by=created_utc&order=desc&live=true HTTP/1.1" 200 -
+2025-04-30 18:40:56,122 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:40:56,126 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:40:56] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:03,237 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:03,239 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:03] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:03,514 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:03,515 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:03] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:03,804 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:03] "GET /search?q=d&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:03,837 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:03,840 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:03] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:04,022 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "GET /search?q=don&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:04,029 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "GET /search?q=do&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:04,065 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "GET /search?q=dona&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:04,198 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "GET /search?q=donal&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:04,340 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:04,342 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:04,630 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "GET /search?q=donald&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:04,659 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "GET /search?q=donald+&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:04,663 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:04,668 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:04,986 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:04,986 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:04] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:05,101 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:05] "GET /search?q=donald+t&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:05,297 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:05,299 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:05] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:05,619 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:05,621 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:05] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:06,941 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:06,943 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:06] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:07,551 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:07] "GET /search?q=donald+tr&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:09,984 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:09,984 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:09] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:10,154 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:10] "GET /search?q=donald+tru&sort=top&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:14,767 - __main__ - INFO - Cache hit for /posts?sort_by=created_utc&order=desc
+2025-04-30 18:41:14,767 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:14] "GET /posts?sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 18:41:14,767 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:14,776 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:14] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:15,047 - __main__ - INFO - Cache hit for /posts?sort_by=created_utc&order=desc
+2025-04-30 18:41:15,047 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:15] "GET /posts?sort_by=created_utc&order=desc HTTP/1.1" 200 -
+2025-04-30 18:41:15,087 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:15,088 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:15] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:18,530 - __main__ - INFO - Cache hit for /posts?sort_by=created_utc&order=desc&live=true
+2025-04-30 18:41:18,531 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:18] "GET /posts?sort_by=created_utc&order=desc&live=true HTTP/1.1" 200 -
+2025-04-30 18:41:18,838 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:18,840 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:18] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:20,555 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:20,555 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:20] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:20,818 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:20,818 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:20] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:21,028 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:21,030 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:21] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:21,224 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:21] "GET /search?q=do&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:21,352 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:21,352 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:21] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:21,851 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:21] "GET /search?q=d&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:21,995 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:21] "GET /search?q=donal&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:22,031 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:22] "GET /search?q=don&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:22,107 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:22] "GET /search?q=dona&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:22,161 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:22,161 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:22] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:22,344 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:22] "GET /search?q=donald&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:22,449 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:22] "GET /search?q=donald+&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:22,469 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:22,473 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:22] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:22,790 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:22,792 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:22] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:23,110 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:23] "GET /search?q=donald+tru&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:23,168 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:23] "GET /search?q=donald+tr&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:23,171 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:23,175 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:23] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:23,354 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:23] "GET /search?q=donald+t&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:23,491 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:23,493 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:23] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:23,876 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:23,898 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:23] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:24,101 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:24] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:24,159 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:24] "GET /search?q=donald+trum&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:24,242 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:24,242 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:24] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:24,552 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:24,559 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:24] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:24,956 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:24] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:30,999 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:30,999 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:30] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:31,205 - __main__ - INFO - Cache hit for /posts?sort_by=created_utc&order=desc&live=true
+2025-04-30 18:41:31,206 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:31] "GET /posts?sort_by=created_utc&order=desc&live=true HTTP/1.1" 200 -
+2025-04-30 18:41:31,260 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:31,260 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:31,727 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:31] "GET /search?q=d&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:47,904 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:47,908 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:47] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:48,230 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:48,231 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:48] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:48,482 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:48] "GET /search?q=d&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:48,552 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:48,553 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:48] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:48,902 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:48] "GET /search?q=don&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:49,142 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:49] "GET /search?q=dona&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:49,399 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:49] "GET /search?q=donal&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:49,454 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:49,455 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:49] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:49,631 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:49] "GET /search?q=donald&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:49,648 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:49] "GET /search?q=donald+&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:49,682 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:49] "GET /search?q=do&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:49,993 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:49,994 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:49] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:50,098 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:50] "GET /search?q=donald+t&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:50,304 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:50,305 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:50] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:50,556 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:50] "GET /search?q=donald+tru&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:50,702 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:50,735 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:50] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:50,792 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:50] "GET /search?q=donald+tr&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:50,817 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:50] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:51,198 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:51,230 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:51] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:51,656 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:51] "GET /search?q=donald+trum&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:51,656 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:51,659 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:51] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:51,690 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:51] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:41:51,977 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:51,978 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:51] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:52,290 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:52,291 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:52] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:52,600 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:52,602 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:52] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:57,070 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:41:57,073 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:57] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:41:57,491 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:41:57] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:42:00,805 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:42:00,805 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:42:00] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:42:01,044 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:42:01] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:42:04,656 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:42:04,662 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:42:04] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:42:05,187 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:42:05] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 18:42:27,072 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:42:27] "[33mGET /posts/1k1ncse/comments HTTP/1.1[0m" 404 -
+2025-04-30 18:42:57,106 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:42:57,106 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:42:57] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:42:57,617 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:42:57] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:42:59,169 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:42:59] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:43:03,517 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:43:03] "[33mGET /posts/1gl0ty4/comments HTTP/1.1[0m" 404 -
+2025-04-30 18:43:13,891 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:43:13,893 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:43:13] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:43:14,994 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:43:14] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:43:17,107 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:43:17,107 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:43:17] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:43:17,299 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:43:17] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:43:37,240 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 18:43:37,242 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:43:37] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 18:43:38,170 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:43:38] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:48:38,661 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:48:38] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 18:53:39,432 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 18:53:39] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 19:01:23,944 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 19:01:23] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 19:07:55,115 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 19:07:55] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 19:08:38,622 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 19:08:38] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 19:13:38,649 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 19:13:38] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:15,722 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:15] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:16,492 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:16] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:18,677 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:18,684 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:18] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:18,983 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:18,998 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:18] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:19,638 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:19] "GET /search?q=donald+tru&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:20,057 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:20] "GET /search?q=donald+t&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:20,080 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:20] "GET /search?q=donald+&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:20,347 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:20,506 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:20] "GET /search?q=donald&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:20,541 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:20] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:21,530 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:21] "GET /search?q=dona&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:21,879 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:21] "GET /search?q=donal&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:22,121 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:22] "GET /search?q=don&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:22,473 - __main__ - INFO - Executing query: SELECT * FROM posts WHERE subreddit LIKE ? ORDER BY created_utc DESC with params ['%politics%']
+2025-04-30 23:08:22,589 - __main__ - ERROR - Database query error: no such column: subreddit
+2025-04-30 23:08:22,619 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:22] "[35m[1mGET /posts?subreddit=politics&sort_by=created_utc&order=desc&live=true HTTP/1.1[0m" 500 -
+2025-04-30 23:08:22,652 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:22,666 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:22] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:22,711 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:22] "GET /search?q=do&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:23,238 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:23] "GET /search?q=d&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:23,732 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:23] "GET /search?q=dona&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:23,924 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:23] "GET /search?q=donald+trum&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:24,148 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:24] "GET /search?q=donald&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:24,171 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:24] "GET /search?q=donald+&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:24,334 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:24] "GET /search?q=donal&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:24,640 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:24,723 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:24] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:24,791 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:24] "GET /search?q=don&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:25,032 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:25] "GET /search?q=donald+t&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:25,263 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:25] "GET /search?q=donald+tru&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:25,480 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:25] "GET /search?q=do&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:25,789 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:25,803 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:25] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:25,919 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:25] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:26,110 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:26] "GET /search?q=d&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:26,708 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:26,761 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:26] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:27,151 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:27] "GET /search?q=donald+trump&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:27,367 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:27,443 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:27] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:27,978 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:28,038 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:28] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:28,341 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:28] "GET /search?q=donald+trum&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:28,651 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:28,679 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:28] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:28,804 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:28] "GET /search?q=donald+tr&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:29,051 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:29,066 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:29] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:29,466 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:29,493 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:29] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:29,982 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:30,049 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:30] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:30,558 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:30,590 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:30] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:31,070 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:31,153 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:31,777 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:31,805 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:31] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:32,302 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:32,338 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:32] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:32,782 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:32,816 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:32] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:32,985 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:32] "GET /search?q=donald+tr&sort=relevance&time_filter=all&subreddit=politics HTTP/1.1" 200 -
+2025-04-30 23:08:33,180 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:33,186 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:33] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:33,549 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:33,559 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:33] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:33,889 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:33,890 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:33] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:34,230 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:34,239 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:34] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:34,568 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:34,577 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:34] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:34,909 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:34,915 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:34] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:38,028 - __main__ - ERROR - Error fetching popular subreddits: no such column: subreddit
+2025-04-30 23:08:38,040 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:38] "[35m[1mGET /popular-subreddits HTTP/1.1[0m" 500 -
+2025-04-30 23:08:38,587 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:38] "GET /search?q=donald+trump&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 23:08:56,063 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 23:08:56] "[33mGET /posts/1k1ncse/comments HTTP/1.1[0m" 404 -
