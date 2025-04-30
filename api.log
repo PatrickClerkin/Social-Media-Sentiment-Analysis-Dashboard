@@ -348,3 +348,20 @@
 2025-04-29 14:41:35,114 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:35] "[31m[1mGET /posts?search=fireland HTTP/1.1[0m" 400 -
 2025-04-29 14:41:35,623 - __main__ - INFO - Cache hit for /posts?search=fireland
 2025-04-29 14:41:35,626 - werkzeug - INFO - 127.0.0.1 - - [29/Apr/2025 14:41:35] "[31m[1mGET /posts?search=fireland HTTP/1.1[0m" 400 -
+2025-04-30 11:52:29,388 - __main__ - INFO - Reddit API client initialized successfully
+2025-04-30 11:52:29,402 - __main__ - INFO - Database indexes created successfully
+2025-04-30 11:52:29,405 - auth - INFO - Auth database tables created successfully
+2025-04-30 11:52:29,405 - __main__ - INFO - Databases initialized
+2025-04-30 11:52:29,408 - __main__ - INFO - Starting Flask server on port 5000, debug mode: False
+2025-04-30 11:52:29,459 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.20.10.5:5000
+2025-04-30 11:52:29,461 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-04-30 11:53:20,722 - __main__ - INFO - Executing query: SELECT * FROM posts ORDER BY created_utc DESC with params []
+2025-04-30 11:53:20,730 - __main__ - INFO - Cached response for /posts?
+2025-04-30 11:53:20,731 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 11:53:20] "GET /posts HTTP/1.1" 200 -
+2025-04-30 11:53:20,736 - __main__ - INFO - Cache hit for /posts?
+2025-04-30 11:53:20,738 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 11:53:20] "GET /posts HTTP/1.1" 200 -
+2025-04-30 11:53:33,938 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 11:53:33] "GET /search?q=ireland&sort=relevance&time_filter=all HTTP/1.1" 200 -
+2025-04-30 11:54:35,923 - werkzeug - INFO - 127.0.0.1 - - [30/Apr/2025 11:54:35] "GET /search?q=ireland&sort=relevance&time_filter=all HTTP/1.1" 200 -

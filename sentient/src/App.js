@@ -72,77 +72,83 @@ function App() {
 
   // Base API URL
   const BASE_URL = "http://127.0.0.1:5000";
+// Fetch posts or perform live Reddit search
+const fetchPosts = () => {
+  setLoading(true);
+  setError(null);
+  setIsLiveSearch(false);
 
-  // Fetch posts or perform live Reddit search
-  const fetchPosts = () => {
-    setLoading(true);
-    setError(null);
-    setIsLiveSearch(false);
-
-    // Build URL and parameters based on search method and filters
-    let url = `${BASE_URL}/posts`;
-    const params = new URLSearchParams();
+  // Build URL and parameters based on search method and filters
+  let url = `${BASE_URL}/posts`;
+  const params = new URLSearchParams();
+  
+  // If search term is set, determine if we should use live search
+  if (filters.searchTerm && searchOptions.searchMethod === 'live') {
+    // For live search use the dedicated /search endpoint
+    url = `${BASE_URL}/search`;
+    params.append('q', filters.searchTerm);
+    params.append('sort', searchOptions.sortMethod);
+    params.append('time_filter', searchOptions.timeFilter);
+    setIsLiveSearch(true);
     
-    // If search term is set, determine if we should use live search
-    if (filters.searchTerm && searchOptions.searchMethod === 'live') {
-      setIsLiveSearch(true);
-      url = `${BASE_URL}/search`;
-      params.append('q', filters.searchTerm);
-      params.append('sort', searchOptions.sortMethod);
-      params.append('time_filter', searchOptions.timeFilter);
-      
-      if (filters.subreddit) {
-        params.append('subreddit', filters.subreddit);
-      }
-    } else {
-      // Regular database search with all filters
-      if (filters.minScore) params.append('min_score', filters.minScore);
-      if (filters.maxScore) params.append('max_score', filters.maxScore);
-      if (filters.minComments) params.append('min_comments', filters.minComments);
-      if (filters.maxComments) params.append('max_comments', filters.maxComments);
-      if (filters.sentiment) params.append('sentiment', filters.sentiment);
-      if (filters.subreddit) params.append('subreddit', filters.subreddit);
-      if (filters.searchTerm) params.append('search', filters.searchTerm);
-
-      const startTs = dateToTimestamp(filters.startDate);
-      const endTs = dateToTimestamp(filters.endDate);
-      if (startTs) params.append('start_date', startTs);
-      if (endTs) params.append('end_date', endTs + 86400);
+    if (filters.subreddit) {
+      params.append('subreddit', filters.subreddit);
     }
+  } else {
+    // Regular database search with all filters
+    if (filters.minScore) params.append('min_score', filters.minScore);
+    if (filters.maxScore) params.append('max_score', filters.maxScore);
+    if (filters.minComments) params.append('min_comments', filters.minComments);
+    if (filters.maxComments) params.append('max_comments', filters.maxComments);
+    if (filters.sentiment) params.append('sentiment', filters.sentiment);
+    if (filters.subreddit) params.append('subreddit', filters.subreddit);
+    if (filters.searchTerm) params.append('search', filters.searchTerm);
 
-    // Final URL with query parameters
-    const finalUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
+    const startTs = dateToTimestamp(filters.startDate);
+    const endTs = dateToTimestamp(filters.endDate);
+    if (startTs) params.append('start_date', startTs);
+    if (endTs) params.append('end_date', endTs + 86400);
     
-    // Set up request options
-    const fetchOptions = {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    };
-
-    // Add auth token if user is logged in
-    if (currentUser) {
-      const token = localStorage.getItem('authToken');
-      if (token) fetchOptions.headers['Authorization'] = `Bearer ${token}`;
+    // Add live parameter for the backend to decide whether to redirect to live search
+    if (searchOptions.searchMethod === 'live') {
+      params.append('live', 'true');
     }
+  }
 
-    // Execute the fetch request
-    fetch(finalUrl, fetchOptions)
-      .then(response => {
-        if (!response.ok) throw new Error(`Failed to fetch posts (${response.status}): ${response.statusText}`);
-        return response.json();
-      })
-      .then(data => {
-        setCurrentPage(1);
-        setPosts(data);
-        applyClientSideFilters(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching posts:", err);
-        setError(err);
-        setLoading(false);
-      });
+  // Final URL with query parameters
+  const finalUrl = `${url}${params.toString() ? '?' + params.toString() : ''}`;
+  console.log("Fetching from URL:", finalUrl);
+  
+  // Set up request options
+  const fetchOptions = {
+    method: 'GET',
+    headers: { 'Accept': 'application/json' }
   };
+
+  // Add auth token if user is logged in
+  if (currentUser) {
+    const token = localStorage.getItem('authToken');
+    if (token) fetchOptions.headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Execute the fetch request
+  fetch(finalUrl, fetchOptions)
+    .then(response => {
+      if (!response.ok) throw new Error(`Failed to fetch posts (${response.status}): ${response.statusText}`);
+      return response.json();
+    })
+    .then(data => {
+      setCurrentPage(1);
+      setPosts(data);
+      applyClientSideFilters(data);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error("Error fetching posts:", err);
+      setError(err);
+      setLoading(false);
+    });
+};
 
   // Helper: convert date string to Unix timestamp
   const dateToTimestamp = (dateString) => {

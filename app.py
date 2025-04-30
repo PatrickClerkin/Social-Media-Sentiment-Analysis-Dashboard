@@ -55,16 +55,23 @@ RATE_LIMIT = {
     'clients': {}
 }
 
-# Initialize PRAW for Reddit API
-# Get credentials from environment variables or use your own credentials here
-reddit = praw.Reddit(
-    client_id=os.environ.get('REDDIT_CLIENT_ID', 'YOUR_CLIENT_ID_HERE'),  # Replace with your actual client_id
-    client_secret=os.environ.get('REDDIT_CLIENT_SECRET', 'YOUR_CLIENT_SECRET_HERE'),  # Replace with your actual client_secret
-    user_agent=os.environ.get('REDDIT_USER_AGENT', 'RedditSentimentAPI/1.0 by YourUsername')  # Replace with your username
-)
-
 # Initialize VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
+
+# Initialize PRAW for Reddit API
+try:
+    # Get credentials from environment variables or use fallback values
+    # Note: In production, you should use environment variables instead of hardcoded values
+    reddit = praw.Reddit(
+        client_id=os.environ.get('REDDIT_CLIENT_ID', 'HhQIW6ImodQPyWAFdJLv5g'),
+        client_secret=os.environ.get('REDDIT_CLIENT_SECRET', 'c6kmkCPJeCIqrF65v8MAXO6zJhPmPw'),
+        user_agent=os.environ.get('REDDIT_USER_AGENT', 'RedditSentimentAPI/1.0 by PatrikSearchApp')
+    )
+    logger.info("Reddit API client initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize Reddit API client: {e}")
+    # Create a placeholder that will handle errors gracefully
+    reddit = None
 
 def get_db_connection():
     """Establish a connection to the SQLite database."""
@@ -190,6 +197,9 @@ def health():
                 "connected": True,
                 "post_count": count
             },
+            "reddit_api": {
+                "connected": reddit is not None
+            },
             "uptime_seconds": uptime,
             "cache_entries": len(cache['data'])
         })
@@ -206,6 +216,9 @@ def search_reddit():
     q = request.args.get('q')
     if not q:
         return jsonify({'error': 'Missing search term'}), 400
+    
+    if reddit is None:
+        return jsonify({'error': 'Reddit API client not initialized. Check your credentials.'}), 500
     
     limit = request.args.get('limit', 25, type=int)
     sort = request.args.get('sort', 'relevance')  # relevance, hot, new, top
@@ -250,7 +263,8 @@ def search_reddit():
                 'sentiment_pos': sent['pos'],
                 'sentiment_neu': sent['neu'],
                 'sentiment_neg': sent['neg'],
-                'created_date': datetime.fromtimestamp(submission.created_utc).isoformat()
+                'created_date': datetime.fromtimestamp(submission.created_utc).isoformat(),
+                'author': str(submission.author)
             }
             
             results.append(post_data)
@@ -270,57 +284,12 @@ def search_reddit():
 @cache_response()
 def get_posts():
     """
-    Retrieve all posts from the database with optional filters.
-    Supports numeric, date, sentiment, subreddit filters, and text search.
+    Retrieve posts from database or live Reddit search if search parameter is present.
     """
-    # Check if this is actually a search request and redirect to live search if so
-    if request.args.get('search'):
-        # First try to get from database
-        conn = get_db_connection()
-        if conn is None:
-            return jsonify({"error": "Failed to connect to database"}), 500
-
-        query = "SELECT * FROM posts"
-        filters = []
-        params = []
-
-        # Add search filter
-        search = request.args.get('search')
-        wildcard = f"%{search}%"
-        filters.append("(title LIKE ? OR selftext LIKE ?)")
-        params.extend([wildcard, wildcard])
-
-        # Combine filters
-        if filters:
-            query += " WHERE " + " AND ".join(filters)
-
-        # Sorting
-        query += " ORDER BY created_utc DESC LIMIT 25"
-
-        try:
-            cur = conn.cursor()
-            cur.execute(query, tuple(params))
-            rows = cur.fetchall()
-        except Error as e:
-            logger.error(f"Database query error: {e}")
-            conn.close()
-            return jsonify({"error": str(e)}), 500
-
-        conn.close()
-        
-        # If we have results from the database, return them
-        if rows and len(rows) > 0:
-            posts_list = [dict(r) for r in rows]
-            for post in posts_list:
-                post['created_date'] = datetime.fromtimestamp(post['created_utc']).isoformat()
-            return jsonify(posts_list)
-        
-        # Otherwise, try live search
-        try:
-            return search_reddit()
-        except Exception as e:
-            logger.error(f"Error redirecting to live search: {e}")
-            # Continue with database search even if live search fails
+    # Check if this is a search request that should be redirected to live search
+    search_term = request.args.get('search')
+    if search_term and request.args.get('live') == 'true':
+        return search_reddit()
     
     # Regular database search
     conn = get_db_connection()
@@ -390,9 +359,8 @@ def get_posts():
         params.extend([f"%/r/{sr}/%", f"%{sr}%"])
 
     # Text search
-    search = request.args.get('search')
-    if search:
-        wildcard = f"%{search}%"
+    if search_term:
+        wildcard = f"%{search_term}%"
         filters.append("(title LIKE ? OR selftext LIKE ?)")
         params.extend([wildcard, wildcard])
 
