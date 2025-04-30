@@ -2,22 +2,16 @@ import praw
 from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 import sqlite3
-import json
 from sqlite3 import Error
 import logging
 import time
 from datetime import datetime
-from functools import wraps
 import os
-import jwt
 import secrets
 import hashlib
 
 # Import for sentiment analysis
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
-# Import auth blueprint and init_auth_db
-from auth import auth_bp, init_auth_db, token_required
 
 # Set up logging
 logging.basicConfig(
@@ -33,27 +27,16 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app, supports_credentials=True)  # Enable CORS with credentials support
 
-# Register the auth blueprint
-app.register_blueprint(auth_bp, url_prefix='/auth')
-
 # Configuration
 DATABASE = 'reddit_posts.db'
-CACHE_TIMEOUT = 300  # 5 minutes cache timeout
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', secrets.token_hex(32))
-JWT_EXPIRATION_DAYS = 7
 
 # Simple in-memory cache
 cache = {
     'data': {},
     'timestamp': {}
 }
-
-# Rate limiting configuration
-RATE_LIMIT = {
-    'requests': 100,  # number of requests
-    'per_seconds': 60,  # time window in seconds
-    'clients': {}
-}
+CACHE_TIMEOUT = 300  # 5 minutes cache timeout
 
 # Initialize VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -61,7 +44,6 @@ analyzer = SentimentIntensityAnalyzer()
 # Initialize PRAW for Reddit API
 try:
     # Get credentials from environment variables or use fallback values
-    # Note: In production, you should use environment variables instead of hardcoded values
     reddit = praw.Reddit(
         client_id=os.environ.get('REDDIT_CLIENT_ID', 'HhQIW6ImodQPyWAFdJLv5g'),
         client_secret=os.environ.get('REDDIT_CLIENT_SECRET', 'c6kmkCPJeCIqrF65v8MAXO6zJhPmPw'),
@@ -84,70 +66,78 @@ def get_db_connection():
         return None
 
 def init_db():
-    """Initialize database with indexes for better performance."""
+    """Initialize database with tables and indexes for better performance."""
     conn = get_db_connection()
     if conn is not None:
         try:
             cur = conn.cursor()
-            # Create indexes for common query fields
+            
+            # Create posts table if it doesn't exist
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS posts (
+                    id TEXT PRIMARY KEY,
+                    title TEXT,
+                    score INTEGER,
+                    num_comments INTEGER,
+                    upvote_ratio REAL,
+                    url TEXT,
+                    author TEXT,
+                    created_utc REAL,
+                    selftext TEXT,
+                    sentiment_neg REAL,
+                    sentiment_neu REAL,
+                    sentiment_pos REAL,
+                    sentiment_compound REAL,
+                    subreddit TEXT,
+                    collected_at REAL
+                )
+            ''')
+            
+            # Create comments table if it doesn't exist
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS comments (
+                    id TEXT PRIMARY KEY,
+                    post_id TEXT,
+                    author TEXT,
+                    body TEXT,
+                    score INTEGER,
+                    created_utc REAL,
+                    sentiment_neg REAL,
+                    sentiment_neu REAL,
+                    sentiment_pos REAL,
+                    sentiment_compound REAL,
+                    FOREIGN KEY (post_id) REFERENCES posts (id)
+                )
+            ''')
+            
+            # Create simple users table
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT UNIQUE NOT NULL,
+                    password_hash TEXT NOT NULL
+                )
+            ''')
+            
+            # Create indexes for better query performance
             cur.execute('CREATE INDEX IF NOT EXISTS idx_score ON posts (score)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_num_comments ON posts (num_comments)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_created_utc ON posts (created_utc)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_sentiment_compound ON posts (sentiment_compound)')
+            cur.execute('CREATE INDEX IF NOT EXISTS idx_subreddit ON posts (subreddit)')
+            
             conn.commit()
-            logger.info("Database indexes created successfully")
+            logger.info("Database tables and indexes created successfully")
         except Error as e:
-            logger.error(f"Error creating database indexes: {e}")
+            logger.error(f"Error creating database: {e}")
         finally:
             conn.close()
 
-# Initialize databases when the application starts
+# Initialize database when the application starts
 with app.app_context():
     init_db()
-    init_auth_db()
-    logger.info("Databases initialized")
+    logger.info("Database initialized")
 
-def rate_limit(f):
-    """Rate limiting decorator"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        client_ip = request.remote_addr
-        current_time = time.time()
-        if client_ip not in RATE_LIMIT['clients'] or \
-           current_time - RATE_LIMIT['clients'][client_ip]['start_time'] > RATE_LIMIT['per_seconds']:
-            RATE_LIMIT['clients'][client_ip] = {
-                'count': 1,
-                'start_time': current_time
-            }
-        else:
-            RATE_LIMIT['clients'][client_ip]['count'] += 1
-        if RATE_LIMIT['clients'][client_ip]['count'] > RATE_LIMIT['requests']:
-            logger.warning(f"Rate limit exceeded for {client_ip}")
-            return jsonify({
-                'error': 'Rate limit exceeded',
-                'message': 'Too many requests. Please try again later.'
-            }), 429
-        return f(*args, **kwargs)
-    return decorated_function
-
-def cache_response(timeout=CACHE_TIMEOUT):
-    """Caching decorator"""
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            cache_key = request.path + '?' + request.query_string.decode('utf-8')
-            if cache_key in cache['data'] and time.time() - cache['timestamp'][cache_key] < timeout:
-                logger.info(f"Cache hit for {cache_key}")
-                return cache['data'][cache_key]
-            response = f(*args, **kwargs)
-            cache['data'][cache_key] = response
-            cache['timestamp'][cache_key] = time.time()
-            logger.info(f"Cached response for {cache_key}")
-            return response
-        return decorated_function
-    return decorator
-
-# Helper function to analyze sentiment
 def analyze_sentiment(text):
     """Analyze sentiment of text using VADER."""
     try:
@@ -159,35 +149,29 @@ def analyze_sentiment(text):
         # Return neutral sentiment in case of error
         return {'neg': 0, 'neu': 1, 'pos': 0, 'compound': 0}
 
-# Helper function to insert a comment into the database
-def insert_comment(conn, comment):
-    """Insert a comment into the database."""
-    try:
-        sql = '''
-            INSERT OR REPLACE INTO comments(
-                id, post_id, author, body, score, created_utc,
-                sentiment_neg, sentiment_neu, sentiment_pos, sentiment_compound
-            )
-            VALUES(?,?,?,?,?,?,?,?,?,?)
-        '''
-        cur = conn.cursor()
-        cur.execute(sql, (
-            comment['id'],
-            comment['post_id'],
-            comment['author'],
-            comment['body'],
-            comment['score'],
-            comment['created_utc'],
-            comment['sentiment_neg'],
-            comment['sentiment_neu'],
-            comment['sentiment_pos'],
-            comment['sentiment_compound']
-        ))
-        conn.commit()
-        return True
-    except Exception as e:
-        logger.error(f"Error inserting comment {comment['id']}: {e}")
-        return False
+# Cache helper function - not using decorator
+def check_cache(cache_key, timeout=CACHE_TIMEOUT):
+    """Check if response is in cache."""
+    if cache_key in cache['data'] and time.time() - cache['timestamp'][cache_key] < timeout:
+        logger.info(f"Cache hit for {cache_key}")
+        return cache['data'][cache_key]
+    return None
+
+def set_cache(cache_key, response):
+    """Set response in cache."""
+    cache['data'][cache_key] = response
+    cache['timestamp'][cache_key] = time.time()
+    logger.info(f"Cached response for {cache_key}")
+    return response
+
+def extract_text_for_wordcloud(posts):
+    """Extract text from posts for word cloud."""
+    combined_text = ""
+    for post in posts:
+        combined_text += post['title'] + " "
+        if post['selftext']:
+            combined_text += post['selftext'] + " "
+    return combined_text
 
 # Routes
 @app.route('/', methods=['GET'])
@@ -195,55 +179,19 @@ def home():
     """Root route that provides a welcome message."""
     return jsonify({
         "message": "Welcome to the Reddit Sentiment Analysis API!",
-        "version": "2.0.0",
+        "version": "1.0.0",
         "endpoints": {
             "/search": "Live search Reddit posts",
             "/posts": "Get all posts with filtering options",
-            "/posts/<post_id>": "Get a specific post by ID",
             "/posts/<post_id>/comments": "Get comments for a specific post",
-            "/stats": "Get statistical information about the posts",
-            "/health": "API health check",
-            "/subreddits": "Get list of all subreddits in the database",
-            "/auth/register": "Register a new user",
-            "/auth/login": "Login to get an access token",
-            "/auth/profile": "Get user profile (requires authentication)",
-            "/auth/filters": "Save and retrieve user filters (requires authentication)"
+            "/popular-subreddits": "Get list of popular subreddits",
+            "/wordcloud": "Get word frequency data for word cloud visualization"
         }
     })
 
-@app.route('/health', methods=['GET'])
-def health():
-    """Health check endpoint."""
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"status": "error", "message": "Database connection failed"}), 500
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM posts")
-        count = cur.fetchone()[0]
-        uptime = int(time.time() - getattr(app, 'start_time', time.time()))
-        return jsonify({
-            "status": "healthy",
-            "database": {
-                "connected": True,
-                "post_count": count
-            },
-            "reddit_api": {
-                "connected": reddit is not None
-            },
-            "uptime_seconds": uptime,
-            "cache_entries": len(cache['data'])
-        })
-    except Exception as e:
-        logger.error(f"Health check error: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
-    finally:
-        conn.close()
-
 @app.route('/search', methods=['GET'])
-@rate_limit
 def search_reddit():
-    """Live search on Reddit across all subreddits."""
+    """Live search on Reddit."""
     q = request.args.get('q')
     if not q:
         return jsonify({'error': 'Missing search term'}), 400
@@ -300,10 +248,6 @@ def search_reddit():
             
             results.append(post_data)
             
-            # If using hot/new/top without sufficient results, stop after we have enough
-            if sort in ['hot', 'new', 'top'] and len(results) >= limit:
-                break
-                
         return jsonify(results)
         
     except Exception as e:
@@ -311,12 +255,16 @@ def search_reddit():
         return jsonify({'error': f'Search failed: {str(e)}'}), 500
 
 @app.route('/posts', methods=['GET'])
-@rate_limit
-@cache_response()
 def get_posts():
     """
-    Retrieve posts from database or live Reddit search if search parameter is present.
+    Retrieve posts from database with filtering options.
     """
+    # Check cache
+    cache_key = request.path + '?' + request.query_string.decode('utf-8')
+    cached_response = check_cache(cache_key)
+    if cached_response:
+        return cached_response
+    
     # Check if this is a search request that should be redirected to live search
     search_term = request.args.get('search')
     if search_term and request.args.get('live') == 'true':
@@ -344,30 +292,6 @@ def get_posts():
     if request.args.get('max_comments'):
         filters.append("num_comments <= ?")
         params.append(int(request.args['max_comments']))
-    if request.args.get('min_upvote_ratio'):
-        filters.append("upvote_ratio >= ?")
-        params.append(float(request.args['min_upvote_ratio']))
-    if request.args.get('max_upvote_ratio'):
-        filters.append("upvote_ratio <= ?")
-        params.append(float(request.args['max_upvote_ratio']))
-
-    # Date filters
-    if request.args.get('start_date'):
-        sd = request.args['start_date']
-        try:
-            ts = float(sd) if sd.isdigit() else datetime.fromisoformat(sd.replace('Z','+00:00')).timestamp()
-            filters.append("created_utc >= ?")
-            params.append(ts)
-        except:
-            return jsonify({"error": "Invalid start_date format"}), 400
-    if request.args.get('end_date'):
-        ed = request.args['end_date']
-        try:
-            ts = float(ed) if ed.isdigit() else datetime.fromisoformat(ed.replace('Z','+00:00')).timestamp()
-            filters.append("created_utc <= ?")
-            params.append(ts)
-        except:
-            return jsonify({"error": "Invalid end_date format"}), 400
 
     # Sentiment filter
     sentiment = request.args.get('sentiment')
@@ -386,8 +310,8 @@ def get_posts():
     # Subreddit filter
     if request.args.get('subreddit'):
         sr = request.args['subreddit'].lower()
-        filters.append("(url LIKE ? OR author LIKE ?)")
-        params.extend([f"%/r/{sr}/%", f"%{sr}%"])
+        filters.append("subreddit LIKE ?")
+        params.append(f"%{sr}%")
 
     # Text search
     if search_term:
@@ -439,13 +363,18 @@ def get_posts():
     for post in posts_list:
         post['created_date'] = datetime.fromtimestamp(post['created_utc']).isoformat()
 
-    return jsonify(posts_list)
+    response = jsonify(posts_list)
+    return set_cache(cache_key, response)
 
 @app.route('/posts/<string:post_id>/comments', methods=['GET'])
-@rate_limit
-@cache_response(timeout=300)
-def get_post_comments(post_id):
+def get_comments(post_id):
     """Get comments for a specific post."""
+    # Check cache
+    cache_key = request.path + '?' + request.query_string.decode('utf-8')
+    cached_response = check_cache(cache_key, 300)  # 5 minutes timeout
+    if cached_response:
+        return cached_response
+    
     conn = get_db_connection()
     if conn is None:
         return jsonify({"error": "Failed to connect to database"}), 500
@@ -499,7 +428,29 @@ def get_post_comments(post_id):
                     }
                     
                     # Insert into database for future requests
-                    insert_comment(conn, comment_data)
+                    try:
+                        sql = '''
+                            INSERT OR REPLACE INTO comments(
+                                id, post_id, author, body, score, created_utc,
+                                sentiment_neg, sentiment_neu, sentiment_pos, sentiment_compound
+                            )
+                            VALUES(?,?,?,?,?,?,?,?,?,?)
+                        '''
+                        cur.execute(sql, (
+                            comment_data['id'],
+                            comment_data['post_id'],
+                            comment_data['author'],
+                            comment_data['body'],
+                            comment_data['score'],
+                            comment_data['created_utc'],
+                            comment_data['sentiment_neg'],
+                            comment_data['sentiment_neu'],
+                            comment_data['sentiment_pos'],
+                            comment_data['sentiment_compound']
+                        ))
+                        conn.commit()
+                    except Exception as e:
+                        logger.error(f"Error inserting comment {comment_data['id']}: {e}")
                     
                     # Add to results
                     comments.append(comment_data)
@@ -508,183 +459,242 @@ def get_post_comments(post_id):
                 # Continue with empty comments list
         
         conn.close()
-        return jsonify(comments)
+        response = jsonify(comments)
+        return set_cache(cache_key, response)
     except Exception as e:
         conn.close()
         logger.error(f"Error retrieving comments: {e}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/stats', methods=['GET'])
-@rate_limit
-@cache_response(timeout=600)  # Cache for 10 minutes
-def get_stats():
-    """
-    Get statistical information about the posts in the database.
-    Optionally filtered by the same parameters as the /posts endpoint.
-    """
+@app.route('/popular-subreddits', methods=['GET'])
+def get_popular_subreddits():
+    """Get list of popular subreddits from database."""
+    # Check cache
+    cache_key = request.path
+    cached_response = check_cache(cache_key, 3600)  # 1 hour cache
+    if cached_response:
+        return cached_response
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Failed to connect to database"}), 500
+        
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT subreddit, COUNT(*) as count 
+            FROM posts 
+            WHERE subreddit IS NOT NULL AND subreddit != ''
+            GROUP BY subreddit 
+            ORDER BY count DESC 
+            LIMIT 20
+        ''')
+        
+        subreddits = [{"name": row[0], "count": row[1]} for row in cur.fetchall()]
+        conn.close()
+        
+        response = jsonify(subreddits)
+        return set_cache(cache_key, response)
+    except Exception as e:
+        if conn:
+            conn.close()
+        logger.error(f"Error fetching popular subreddits: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/wordcloud', methods=['GET'])
+def get_wordcloud_data():
+    """Get word frequency data for word cloud visualization."""
+    # Get the posts first using the existing get_posts function
+    # We'll reuse the query parameters for consistency
+    cache_key = request.path + '?' + request.query_string.decode('utf-8')
+    cached_response = check_cache(cache_key, 600)  # 10 minutes cache
+    if cached_response:
+        return cached_response
+    
     conn = get_db_connection()
     if conn is None:
         return jsonify({"error": "Failed to connect to database"}), 500
 
-    # Build filters similar to get_posts
+    # Build query similar to get_posts but we only need title and selftext
+    query = "SELECT title, selftext FROM posts"
     filters = []
     params = []
-    
-    # Add the same filtering logic as get_posts
-    # (Reusing the same filter building code from get_posts)
+
+    # Reuse filters from get_posts
+    # Numeric filters
     if request.args.get('min_score'):
         filters.append("score >= ?")
-        params.append(int(request.args.get('min_score')))
+        params.append(int(request.args['min_score']))
     if request.args.get('max_score'):
         filters.append("score <= ?")
-        params.append(int(request.args.get('max_score')))
-
-    # Filter by number of comments
+        params.append(int(request.args['max_score']))
     if request.args.get('min_comments'):
         filters.append("num_comments >= ?")
-        params.append(int(request.args.get('min_comments')))
+        params.append(int(request.args['min_comments']))
     if request.args.get('max_comments'):
         filters.append("num_comments <= ?")
-        params.append(int(request.args.get('max_comments')))
+        params.append(int(request.args['max_comments']))
 
-    # Filter by date range
-    if request.args.get('start_date'):
-        filters.append("created_utc >= ?")
-        params.append(float(request.args.get('start_date')))
-    if request.args.get('end_date'):
-        filters.append("created_utc <= ?")
-        params.append(float(request.args.get('end_date')))
-
-    # Filter by sentiment
+    # Sentiment filter
     sentiment = request.args.get('sentiment')
     if sentiment:
-        sentiment = sentiment.lower()
-        if sentiment == 'positive':
+        s = sentiment.lower()
+        if s == 'positive':
             filters.append("sentiment_compound > ?")
             params.append(0.05)
-        elif sentiment == 'negative':
+        elif s == 'negative':
             filters.append("sentiment_compound < ?")
             params.append(-0.05)
-        elif sentiment == 'neutral':
+        elif s == 'neutral':
             filters.append("sentiment_compound BETWEEN ? AND ?")
             params.extend([-0.05, 0.05])
 
-    # Build the WHERE clause
-    where_clause = " WHERE " + " AND ".join(filters) if filters else ""
-    
+    # Subreddit filter
+    if request.args.get('subreddit'):
+        sr = request.args['subreddit'].lower()
+        filters.append("subreddit LIKE ?")
+        params.append(f"%{sr}%")
+
+    # Text search
+    search_term = request.args.get('search')
+    if search_term:
+        wildcard = f"%{search_term}%"
+        filters.append("(title LIKE ? OR selftext LIKE ?)")
+        params.extend([wildcard, wildcard])
+
+    # Combine filters
+    if filters:
+        query += " WHERE " + " AND ".join(filters)
+
+    # Limit to 200 posts for performance
+    query += " LIMIT 200"
+
     try:
         cur = conn.cursor()
+        cur.execute(query, tuple(params))
+        posts = cur.fetchall()
         
-        # Get basic counts
-        cur.execute(f"SELECT COUNT(*) FROM posts{where_clause}", tuple(params))
-        total_posts = cur.fetchone()[0]
+        # Process the text
+        all_text = " ".join([f"{post['title']} {post['selftext']}" for post in posts])
         
-        # Get sentiment distribution
-        cur.execute(f"""
-            SELECT
-                SUM(CASE WHEN sentiment_compound > 0.05 THEN 1 ELSE 0 END) as positive,
-                SUM(CASE WHEN sentiment_compound BETWEEN -0.05 AND 0.05 THEN 1 ELSE 0 END) as neutral,
-                SUM(CASE WHEN sentiment_compound < -0.05 THEN 1 ELSE 0 END) as negative
-            FROM posts{where_clause}
-        """, tuple(params))
-        sentiment_counts = dict(cur.fetchone())
+        # Clean text
+        import re
+        from collections import Counter
         
-        # Get averages
-        cur.execute(f"""
-            SELECT
-                AVG(score) as avg_score,
-                AVG(num_comments) as avg_comments,
-                AVG(upvote_ratio) as avg_upvote_ratio,
-                AVG(sentiment_compound) as avg_sentiment
-            FROM posts{where_clause}
-        """, tuple(params))
-        averages = dict(cur.fetchone())
+        # Convert to lowercase and remove punctuation
+        text = re.sub(r'[^\w\s]', '', all_text.lower())
         
-        # Get top subreddits (based on URL patterns)
-        cur.execute(f"""
-            SELECT
-                SUBSTRING(url, INSTR(url, '/r/') + 3, 
-                    CASE 
-                        WHEN INSTR(SUBSTRING(url, INSTR(url, '/r/') + 3), '/') > 0 
-                        THEN INSTR(SUBSTRING(url, INSTR(url, '/r/') + 3), '/') - 1
-                        ELSE LENGTH(SUBSTRING(url, INSTR(url, '/r/') + 3))
-                    END
-                ) as subreddit,
-                COUNT(*) as count
-            FROM posts
-            WHERE url LIKE '%/r/%'{' AND ' + ' AND '.join(filters) if filters else ''}
-            GROUP BY subreddit
-            ORDER BY count DESC
-            LIMIT 10
-        """, tuple(params))
-        top_subreddits = [dict(row) for row in cur.fetchall()]
+        # Split into words
+        words = text.split()
         
-        # Get time distribution (posts per day)
-        cur.execute(f"""
-            SELECT
-                CAST(created_utc / 86400 AS INTEGER) * 86400 as day,
-                COUNT(*) as count
-            FROM posts{where_clause}
-            GROUP BY CAST(created_utc / 86400 AS INTEGER)
-            ORDER BY day
-        """, tuple(params))
-        time_distribution = [dict(row) for row in cur.fetchall()]
+        # Filter out common stop words
+        stop_words = {'the', 'and', 'to', 'a', 'of', 'in', 'is', 'that', 'this', 'it', 
+                      'for', 'with', 'on', 'as', 'are', 'be', 'was', 'were', 'by', 'at',
+                      'or', 'not', 'from', 'an', 'but', 'they', 'you', 'i', 'he', 'she',
+                      'we', 'his', 'her', 'their', 'our', 'what', 'which', 'who', 'when',
+                      'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more',
+                      'most', 'some', 'such', 'no', 'nor', 'too', 'very', 'can', 'will',
+                      'just', 'should', 'now', 'also', 'if', 'has', 'have', 'had', 'do', 
+                      'does', 'did', 'doing', 'than', 'then', 'so', 'here', 'there', 'get',
+                      'got', 'getting', 'goes', 'going', 'went', 'about', 'would', 'could',
+                      'should', 'https', 'www', 'http', 'com', 'org', 'net', 'html', 'php', 'jsp'}
         
-        # Convert epoch days to ISO format dates
-        for day in time_distribution:
-            day['date'] = datetime.fromtimestamp(day['day']).strftime('%Y-%m-%d')
+        filtered_words = [word for word in words if word not in stop_words and len(word) > 2]
         
-    except Error as e:
-        logger.error(f"Error retrieving stats: {e}")
+        # Count frequencies
+        word_counts = Counter(filtered_words)
+        
+        # Get top 100 words
+        top_words = word_counts.most_common(100)
+        
+        # Format for word cloud
+        word_cloud_data = [{"text": word, "value": count} for word, count in top_words]
+        
         conn.close()
+        
+        response = jsonify(word_cloud_data)
+        return set_cache(cache_key, response)
+    except Exception as e:
+        if conn:
+            conn.close()
+        logger.error(f"Error generating word cloud data: {e}")
         return jsonify({"error": str(e)}), 500
 
+# Simple user routes for basic authentication
+@app.route('/auth/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    
+    if not data or not data.get('username') or not data.get('password'):
+        return jsonify({'message': 'Missing username or password'}), 400
+        
+    username = data.get('username')
+    password = data.get('password')
+    
+    # Simple password hash
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
+        if cursor.fetchone():
+            conn.close()
+            return jsonify({'message': 'Username already exists'}), 409
+        
+        cursor.execute(
+            'INSERT INTO users (username, password_hash) VALUES (?, ?)',
+            (username, password_hash)
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'message': 'User registered successfully',
+            'username': username
+        }), 201
+        
+    except Exception as e:
+        if conn:
+            conn.close()
+        logger.error(f"Registration error: {e}")
+        return jsonify({'message': f'Registration failed: {str(e)}'}), 500
+
+@app.route('/auth/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    
+    if not data or not data.get('username') or not data.get('password'):
+        return jsonify({'message': 'Missing username or password'}), 400
+        
+    username = data.get('username')
+    password = data.get('password')
+    
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"error": "Database connection failed"}), 500
+        
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users WHERE username = ? AND password_hash = ?', 
+                 (username, password_hash))
+    user = cursor.fetchone()
+    
+    if not user:
+        conn.close()
+        return jsonify({'message': 'Invalid username or password'}), 401
+        
     conn.close()
     
     return jsonify({
-        "total_posts": total_posts,
-        "sentiment_distribution": sentiment_counts,
-        "averages": averages,
-        "top_subreddits": top_subreddits,
-        "time_distribution": time_distribution
-    })
-
-@app.route('/subreddits', methods=['GET'])
-@rate_limit
-@cache_response(timeout=3600)  # Cache for 1 hour
-def get_subreddits():
-    """Get a list of all subreddits in the database based on URL patterns."""
-    conn = get_db_connection()
-    if conn is None:
-        return jsonify({"error": "Failed to connect to database"}), 500
-
-    try:
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT
-                SUBSTRING(url, INSTR(url, '/r/') + 3, 
-                    CASE 
-                        WHEN INSTR(SUBSTRING(url, INSTR(url, '/r/') + 3), '/') > 0 
-                        THEN INSTR(SUBSTRING(url, INSTR(url, '/r/') + 3), '/') - 1
-                        ELSE LENGTH(SUBSTRING(url, INSTR(url, '/r/') + 3))
-                    END
-                ) as subreddit,
-                COUNT(*) as post_count,
-                AVG(sentiment_compound) as avg_sentiment
-            FROM posts
-            WHERE url LIKE '%/r/%'
-            GROUP BY subreddit
-            ORDER BY post_count DESC
-        """)
-        subreddits = [dict(row) for row in cur.fetchall()]
-    except Error as e:
-        logger.error(f"Error retrieving subreddits: {e}")
-        conn.close()
-        return jsonify({"error": str(e)}), 500
-
-    conn.close()
-    
-    return jsonify(subreddits)
+        'message': 'Login successful',
+        'username': username
+    }), 200
 
 @app.errorhandler(404)
 def not_found(e):
